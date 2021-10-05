@@ -1,19 +1,16 @@
 import React from 'react';
 import Head from 'next/head';
+import {OrderBook} from '../components/order-book';
 
-class Home extends React.Component {
-  render(): JSX.Element {
-    return (
-      <div>
-        <Head>
-          <title>Amplify App</title>
-        </Head>
-        <section className="section bg-black">
-          <h1>Amplify App</h1>
-        </section>
-      </div>
-    );
-  }
-}
+const Home = (): JSX.Element => (
+  <>
+    <Head>
+      <title>Order Book</title>
+    </Head>
+    <div>
+      <OrderBook />
+    </div>
+  </>
+);
 
 export default Home;

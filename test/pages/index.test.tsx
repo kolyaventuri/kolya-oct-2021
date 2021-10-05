@@ -11,3 +11,9 @@ test('renders a head component', (t) => {
 
   t.is(tree.find('Head').length, 1);
 });
+
+test('renders an order book', (t) => {
+  const tree = getComponent();
+
+  t.is(tree.find('OrderBook').length, 1);
+});
