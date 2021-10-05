@@ -17,3 +17,12 @@ test('renders an order book', (t) => {
 
   t.is(tree.find('OrderBook').length, 1);
 });
+
+test('renders a header with the right ticker', (t) => {
+  const tree = getComponent();
+  const header = tree.find('Header');
+
+  t.is(header.length, 1);
+  const props = header.props();
+  t.is(props.ticker, 'XBTUSD');
+});
