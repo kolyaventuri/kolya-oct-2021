@@ -1,7 +1,7 @@
 import test from 'ava';
 import proxyquire from 'proxyquire';
 import {stub} from 'sinon';
-import {renderHook} from '@testing-library/react-hooks';
+import {act, renderHook} from '@testing-library/react-hooks';
 
 import {FEED_ID} from '../../src/constants/socket';
 import {useSocket as realUseSocket} from '../../src/hooks/use-socket';
@@ -40,15 +40,31 @@ test('#useSocket returns the status, and a bid and ask array', (t) => {
   const {result} = renderHook(() => useSocket('ticker'));
   const [status, bid, ask] = result.current;
 
-  t.is(status, ConnectionStatus.CONNECTING);
+  t.is(status, ConnectionStatus.OFFLINE);
   t.deepEqual(bid, []);
   t.deepEqual(ask, []);
 });
 
-test('#useSocket initially attempts to set up the socket', (t) => {
-  const {useSocket, actions} = getFn();
+test('#useSocket sets the connection status to CONNECTING on open', (t) => {
+  const {useSocket, events} = getFn();
+  const {result} = renderHook(() => useSocket('ticker'));
+
+  act(() => {
+    events.open();
+  });
+
+  t.is(result.current[0], ConnectionStatus.CONNECTING);
+});
+
+test('#useSocket attempts to subscribe to the ticker after open', (t) => {
+  const {useSocket, events, actions} = getFn();
 
   renderHook(() => useSocket('ticker'));
+
+  act(() => {
+    events.open();
+  });
+
   t.true(
     actions.send.calledWith('subscribe', {
       feed: FEED_ID,
@@ -57,10 +73,13 @@ test('#useSocket initially attempts to set up the socket', (t) => {
   );
 });
 
-test('#useSocket sets the connection status to CONNECTING on init', (t) => {
-  const {useSocket} = getFn();
-  const {result} = renderHook(() => useSocket('ticker'));
-  const [status] = result.current;
+// Test('#useSocket changes to CONNECTED status when socket event if fired' , (t) => {
+//   const {useSocket, events} = getFn();
+//   const {result} = renderHook(() => useSocket('ticker'));
 
-  t.is(status, ConnectionStatus.CONNECTING);
-});
+//   act(() => {
+//     events.open();
+//   });
+
+//   t.is(result.current[0], ConnectionStatus.CONNECTING);
+// });

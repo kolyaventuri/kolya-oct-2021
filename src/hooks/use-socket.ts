@@ -16,10 +16,13 @@ export const useSocket = (ticker: string): UseSocketResult => {
   const [ask] = React.useState<Array<[number, number]>>([]);
 
   React.useEffect(() => {
-    setStatus(ConnectionStatus.CONNECTING);
-    socket.send('subscribe', {
-      feed: FEED_ID,
-      product_ids: [ticker],
+    socket.on('open', () => {
+      setStatus(ConnectionStatus.CONNECTING);
+
+      socket.send('subscribe', {
+        feed: FEED_ID,
+        product_ids: [ticker],
+      });
     });
   }, [ticker, socket]);
 
