@@ -17,6 +17,7 @@ export default {
     'esm',
     'ts-node/register',
     'tsconfig-paths/register',
+    './test/helpers/setup-browser-env.ts',
     './test/helpers/setup-enzyme.ts'
   ]
 }
