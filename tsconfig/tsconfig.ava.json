@@ -1,4 +1,5 @@
 {
+  /* Separate config for AVA resolves issue with standard tsconfig not building JSX */
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
     "jsx": "react"
