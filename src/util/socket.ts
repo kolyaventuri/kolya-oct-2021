@@ -1,13 +1,22 @@
 import {BOOK_URL} from '../constants/urls';
 
-let socket: WebSocket;
+export class WrappedSocket {
+  private readonly __socket: WebSocket;
 
-export const getSocket = (): WebSocket => {
+  constructor(url: string) {
+    this.__socket = new window.WebSocket(url);
+    console.log(typeof this.__socket);
+  }
+}
+
+let socket: WrappedSocket;
+
+export const getSocket = (): WrappedSocket => {
   if (socket) {
     return socket;
   }
 
-  socket = new window.WebSocket(BOOK_URL);
+  socket = new WrappedSocket(BOOK_URL);
 
   return socket;
 };
