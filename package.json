@@ -10,7 +10,8 @@
     "lint": "npm-run-all lint:*",
     "lint:tsc": "tsc --noEmit",
     "lint:lint": "xo --fix",
-    "dev": "cross-env ENV=local next -p 4000",
+    "dev": "cross-env ENV=dev next -p 4000",
+    "dev:local": "cross-env ENV=local next -p 4000",
     "build:files": "next build",
     "build:export": "next export",
     "build": "npm-run-all build:*"
