@@ -8,7 +8,7 @@ class Home extends React.Component {
         <Head>
           <title>Amplify App</title>
         </Head>
-        <section className="section">
+        <section className="section bg-black">
           <h1>Amplify App</h1>
         </section>
       </div>
