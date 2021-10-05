@@ -22,11 +22,7 @@
     "noUnusedParameters": true,
     "noImplicitAny": false,
     "baseUrl": ".",
-    "module": "esnext",
-    "typeRoots": [
-      "../@types",
-      "../node_modules/@types"
-    ]
+    "module": "esnext"
   },
   "exclude": [
     "node_modules",
