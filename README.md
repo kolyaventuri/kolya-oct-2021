@@ -22,6 +22,7 @@ Renders an order book for XBTUSD or ETHUSD, using the CryptoFacilities WebSocket
 - Run with one of the following
   - Use `npm run dev` to run locally, with a live connection to CryptoFacilities
   - Use `npm run local` to run locally, with a **mocked** local websocket
+- App will run on `http://localhost:4000`
 
 # Deployment
 Steps TBD
