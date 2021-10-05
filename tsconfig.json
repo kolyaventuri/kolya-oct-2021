@@ -1,0 +1,12 @@
+{
+  "extends": "./tsconfig/tsconfig.base.json",
+  "exclude": [
+    "node_modules",
+    "webpack"
+  ],
+  "include": [
+    "next-env.d.ts",
+    "src",
+    "test"
+  ]
+}
