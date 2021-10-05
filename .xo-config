@@ -1,0 +1,88 @@
+{
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "project": [
+      "./tsconfig.json"
+    ]
+  },
+  "extends": [
+    "xo-typescript",
+    "plugin:@typescript-eslint/recommended",
+    "xo-react/space"
+  ],
+  "extensions": [
+    "ts"
+  ],
+  "space": true,
+  "prettier": true,
+  "compilerOptions": {
+    "strict": true
+  },
+  "rules": {
+    "@typescript-eslint/camelcase": 0,
+    "@typescript-eslint/naming-convention": [
+      "error",
+      {
+        "selector": "memberLike",
+        "modifiers": [
+          "private"
+        ],
+        "format": [
+          "camelCase"
+        ],
+        "leadingUnderscore": "requireDouble"
+      }
+    ],
+    "indent": 0,
+    "@typescript-eslint/indent": [
+      "error",
+      2
+    ],
+    "@typescript-eslint/no-explicit-any": 0,
+    "@typescript-eslint/no-unused-vars": [
+      "error"
+    ],
+    "@typescript-eslint/prefer-readonly-parameter-types": 0
+  },
+  "overrides": [
+    {
+      "files": "test/**/*.ts?(x)",
+      "rules": {
+        "@typescript-eslint/explicit-function-return-type": 0,
+        "@typescript-eslint/prefer-readonly-parameter-types": 0,
+        "@typescript-eslint/no-unsafe-call": 0,
+        "@typescript-eslint/no-unsafe-assignmen": 0,
+        "@typescript-eslint/no-unsafe-member-access": 0,
+        "@typescript-eslint/no-unsafe-return": 0,
+        "@typescript-eslint/no-unsafe-assignment": 0
+      }
+    },
+    {
+      "files": "src/**/*.ts?(x)",
+      "rules": {
+        "import/no-unassigned-import": 0
+      }
+    },
+    {
+      "files": "**/*.d.ts",
+      "rules": {
+        "@typescript-eslint/no-unused-vars": 0,
+        "@typescript-eslint/triple-slash-reference": 0
+      }
+    }
+  ],
+  "settings": {
+    "react": {
+      "version": "17.0"
+    }
+  },
+  "env": [
+    "node"
+  ],
+  "include": [
+    "**/*.ts?(x)"
+  ],
+  "ignore": [
+    "**/*.js"
+  ]
+}
