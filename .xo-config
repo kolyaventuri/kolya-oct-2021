@@ -84,6 +84,7 @@
     "**/*.ts?(x)"
   ],
   "ignore": [
-    "**/*.js"
+    "**/*.js",
+    "server/socket.ts"
   ]
 }
