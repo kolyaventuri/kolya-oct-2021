@@ -9,11 +9,29 @@ type UseSocketResult = [
   Array<[number, number]>, // Ask
 ];
 
+const mutateBook = (
+  book: Array<[number, number]>,
+  newPrices: Array<[number, number]>,
+): void => {
+  for (const [price, size] of newPrices) {
+    const index = book.findIndex(([bidPrice]) => bidPrice === price);
+    if (index > -1) {
+      if (size > 0) {
+        book[index][1] = size;
+      } else {
+        book.splice(index, 1);
+      }
+    } else if (index === -1 && price > 0) {
+      book.push([price, size]);
+    }
+  }
+};
+
 export const useSocket = (ticker: string): UseSocketResult => {
   const socket = React.useMemo(() => getSocket(), []);
   const [status, setStatus] = React.useState(ConnectionStatus.OFFLINE);
-  const [bid, setBid] = React.useState<Array<[number, number]>>([]);
-  const [ask, setAsk] = React.useState<Array<[number, number]>>([]);
+  const [currentBids, setBids] = React.useState<Array<[number, number]>>([]);
+  const [currentAsks, setAsks] = React.useState<Array<[number, number]>>([]);
 
   React.useEffect(() => {
     socket.on('open', () => {
@@ -36,13 +54,15 @@ export const useSocket = (ticker: string): UseSocketResult => {
       }
 
       if (event.type === 'data') {
-        const {bid, ask} = event.payload as DataMessage['payload'];
+        const {bids, asks} = event.payload as DataMessage['payload'];
+        mutateBook(currentBids, bids);
+        mutateBook(currentAsks, asks);
 
-        setBid(bid);
-        setAsk(ask);
+        setBids(currentBids);
+        setAsks(currentAsks);
       }
     });
-  }, [ticker, socket]);
+  }, [ticker, socket, currentBids, currentAsks]);
 
-  return [status, bid, ask];
+  return [status, currentBids, currentAsks];
 };

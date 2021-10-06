@@ -100,7 +100,7 @@ test('#useSocket changes to OFFLINE status upon recieving the "close" event', (t
   t.is(result.current[0], ConnectionStatus.OFFLINE);
 });
 
-test('#useSocket updates the bid and ask along with a data event', (t) => {
+test('#useSocket sets the bid and ask along with a data event', (t) => {
   const {useSocket, events} = getFn();
   const {result} = renderHook(() => useSocket('ticker'));
 
@@ -110,11 +110,11 @@ test('#useSocket updates the bid and ask along with a data event', (t) => {
   const event = {
     type: 'data',
     payload: {
-      bid: [
+      bids: [
         [1, 1],
         [2, 2],
       ],
-      ask: [
+      asks: [
         [3, 1],
         [4, 2],
       ],
@@ -125,6 +125,86 @@ test('#useSocket updates the bid and ask along with a data event', (t) => {
     events.onmessage(event);
   });
 
-  t.deepEqual(result.current[1], event.payload.bid);
-  t.deepEqual(result.current[2], event.payload.ask);
+  t.deepEqual(result.current[1], event.payload.bids);
+  t.deepEqual(result.current[2], event.payload.asks);
+});
+
+test('#useSocket updates the bid and ask with a subsequent data event', (t) => {
+  const {useSocket, events} = getFn();
+  const {result} = renderHook(() => useSocket('ticker'));
+
+  const event1 = {
+    type: 'data',
+    payload: {
+      bids: [
+        [1, 1],
+        [2, 2],
+      ],
+      asks: [
+        [3, 1],
+        [4, 2],
+      ],
+    },
+  };
+
+  const event2 = {
+    type: 'data',
+    payload: {
+      bids: [[1, 3]],
+      asks: [
+        [4, 4],
+        [5, 1],
+      ],
+    },
+  };
+
+  act(() => {
+    events.onmessage(event1);
+    events.onmessage(event2);
+  });
+
+  t.deepEqual(result.current[1], [
+    [1, 3],
+    [2, 2],
+  ]);
+  t.deepEqual(result.current[2], [
+    [3, 1],
+    [4, 4],
+    [5, 1],
+  ]);
+});
+
+test('#useSocket removes 0-size bids', (t) => {
+  const {useSocket, events} = getFn();
+  const {result} = renderHook(() => useSocket('ticker'));
+
+  const event1 = {
+    type: 'data',
+    payload: {
+      bids: [
+        [1, 1],
+        [2, 2],
+      ],
+      asks: [
+        [3, 1],
+        [4, 2],
+      ],
+    },
+  };
+
+  const event2 = {
+    type: 'data',
+    payload: {
+      bids: [[1, 0]],
+      asks: [],
+    },
+  };
+
+  act(() => {
+    events.onmessage(event1);
+    events.onmessage(event2);
+  });
+
+  t.deepEqual(result.current[1], [[2, 2]]);
+  t.deepEqual(result.current[2], event1.payload.asks);
 });

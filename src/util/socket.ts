@@ -25,8 +25,8 @@ interface SubscribedMessage {
 export interface DataMessage {
   type: 'data';
   payload: {
-    bid: Array<[number, number]>;
-    ask: Array<[number, number]>;
+    bids: Array<[number, number]>;
+    asks: Array<[number, number]>;
   };
 }
 
@@ -74,10 +74,12 @@ export class WrappedSocket {
           const isDelta = data.feed && data.bids && data.asks && !data.event;
           if (data.feed?.endsWith('_snapshot') || isDelta) {
             type = 'data';
-            payload = {
-              bids: data.bids,
-              asks: data.asks,
+            const newPayload: DataMessage['payload'] = {
+              bids: data.bids as DataMessage['payload']['bids'],
+              asks: data.asks as DataMessage['payload']['asks'],
             };
+
+            payload = newPayload;
           }
         } catch {}
 
