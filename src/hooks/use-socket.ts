@@ -24,6 +24,12 @@ export const useSocket = (ticker: string): UseSocketResult => {
         product_ids: [ticker],
       });
     });
+
+    socket.on('message', ({type}) => {
+      if (type === 'subscribed') {
+        setStatus(ConnectionStatus.CONNECTED);
+      }
+    });
   }, [ticker, socket]);
 
   return [status, bid, ask];
