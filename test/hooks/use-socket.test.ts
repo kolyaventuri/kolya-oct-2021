@@ -17,7 +17,7 @@ const getFn = () => {
   };
   const getSocket = () => ({
     on(event: string, callback: (...args: any[]) => void) {
-      events[event] = callback;
+      events[`on${event}`] = callback;
     },
     send(...args: any[]) {
       actions.send(...args);
@@ -50,7 +50,7 @@ test('#useSocket sets the connection status to CONNECTING on open', (t) => {
   const {result} = renderHook(() => useSocket('ticker'));
 
   act(() => {
-    events.open();
+    events.onopen();
   });
 
   t.is(result.current[0], ConnectionStatus.CONNECTING);
@@ -62,7 +62,7 @@ test('#useSocket attempts to subscribe to the ticker after open', (t) => {
   renderHook(() => useSocket('ticker'));
 
   act(() => {
-    events.open();
+    events.onopen();
   });
 
   t.true(
@@ -73,13 +73,24 @@ test('#useSocket attempts to subscribe to the ticker after open', (t) => {
   );
 });
 
-// Test('#useSocket changes to CONNECTED status when socket event if fired' , (t) => {
+// Test('#useSocket changes to CONNECTED status upon recieving the "subscribed" event' , (t) => {
+//   // (kolyaventuri): Based off of the subscribed event - see fixtures/pt_xbtusd.init.json
+//   const event = {
+//     data: JSON.stringify({
+//       event: 'subscribed',
+//       feed: 'book_ui_1',
+//       product_ids: [
+//         'ticker'
+//       ]
+//     })
+//   };
 //   const {useSocket, events} = getFn();
 //   const {result} = renderHook(() => useSocket('ticker'));
 
 //   act(() => {
-//     events.open();
+//     events.onopen();
+//     events.onmessage(event);
 //   });
 
-//   t.is(result.current[0], ConnectionStatus.CONNECTING);
+//   t.is(result.current[0], ConnectionStatus.CONNECTED);
 // });

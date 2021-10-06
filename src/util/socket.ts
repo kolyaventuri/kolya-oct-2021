@@ -2,14 +2,40 @@ import {BOOK_URL} from '../constants/urls';
 import {SubscribeOptions, UnsubscribeOptions} from '../types/socket';
 
 type CallbackFn<T> = (event: T) => unknown;
-const events = ['open', 'error', 'close', 'message'] as const;
-type EventType = typeof events[number];
+type EventType = 'open' | 'error' | 'close' | 'message';
+type MessageType = 'subscribed' | 'data' | 'generic';
 
 const enum ReadyState {
   CONNECTING,
   OPEN,
   CLOSING,
   CLOSED,
+}
+
+interface BaseSocketMessage {
+  type: MessageType;
+  payload: any;
+}
+
+interface SubscribedMessage {
+  type: 'subscribed';
+  payload?: never;
+}
+
+interface DataMessage {
+  type: 'data';
+  payload: {
+    bid: Array<[number, number]>;
+    ask: Array<[number, number]>;
+  };
+}
+
+type SocketMessage = BaseSocketMessage | SubscribedMessage | DataMessage;
+
+interface EventData {
+  [key: string]: unknown;
+  event?: string;
+  feed?: string;
 }
 
 export class WrappedSocket {
@@ -25,11 +51,45 @@ export class WrappedSocket {
 
   public on(event: 'open' | 'error', callback: CallbackFn<Event>): void;
   public on(event: 'close', callback: CallbackFn<CloseEvent>): void;
-  public on(event: 'message', callback: CallbackFn<MessageEvent>): void;
+  public on(event: 'message', callback: CallbackFn<SocketMessage>): void;
   public on(event: EventType, callback: CallbackFn<any>): void {
     const handler = `on${event}`;
-    this.__handlers[event] = callback;
-    this.__socket[handler] = callback;
+
+    let fn = callback;
+    if (event === 'message') {
+      fn = (event: MessageEvent) => {
+        let type: MessageType = 'generic';
+        let payload: unknown = event.data;
+
+        try {
+          const data = JSON.parse(event.data) as EventData;
+          payload = data;
+
+          if (data.event === 'subscribed') {
+            callback({type: 'subscribed'});
+            return;
+          }
+
+          // (kolyaventuri): Quick and dirty way to detect a delta / update
+          const isDelta = data.feed && data.bids && data.asks && !data.event;
+          if (data.feed?.endsWith('_snapshot') || isDelta) {
+            type = 'data';
+            payload = {
+              bids: data.bids,
+              asks: data.asks,
+            };
+          }
+        } catch {}
+
+        callback({
+          type,
+          payload,
+        });
+      };
+    }
+
+    this.__handlers[event] = fn;
+    this.__socket[handler] = fn;
   }
 
   public send(event: 'subscribe', options: SubscribeOptions): void;

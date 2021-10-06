@@ -6,6 +6,8 @@ import {
   WrappedSocket as RealWrappedSocket,
 } from '../../src/util/socket';
 import {delay} from '../helpers/delay';
+import initData from '../../fixtures/pi_xbtusd.init.json';
+import runningData from '../../fixtures/pi_xbtusd.json';
 
 const BOOK_URL = 'wss://some-url/';
 const {getSocket, WrappedSocket} = proxyquire<{
@@ -54,11 +56,17 @@ test('can add error event to wrapped socket', (t) => {
 
 test('can add message event to wrapped socket', (t) => {
   const socket = getSocket();
-  const fn = () => {};
+  const fn = stub();
   socket.on('message', fn);
 
   // @ts-expect-error - Bypass private to check for existence
-  t.is(socket.__socket.onmessage, fn);
+  socket.__socket.onmessage({data: '{"foo": 123}'});
+  t.true(
+    fn.calledWith({
+      type: 'generic',
+      payload: {foo: 123},
+    }),
+  );
 });
 
 test('WrappedSocket#send sends an event to the socket', (t) => {
@@ -150,4 +158,61 @@ test('WrappedSocket#open, if socket is already open, does not re-open it', (t) =
   socket.open();
 
   t.false(constructorStub.called);
+});
+
+test('WrappedSocket#on with a message event of type subscribed sends back the right data', (t) => {
+  const socket = getSocket();
+
+  socket.on('message', (event) => {
+    if (event.type === 'subscribed') {
+      t.true(typeof event.payload === 'undefined');
+    } else {
+      t.fail(`Expected type "subscribed", got "${event.type}"`);
+    }
+  });
+
+  // @ts-expect-error - Direct access
+  socket.__handlers.message({
+    data: JSON.stringify(initData[1]),
+  });
+});
+
+test('WrappedSocket#on with a message event of type data (via snapshot) sends back the right data', (t) => {
+  const socket = getSocket();
+
+  socket.on('message', (event) => {
+    if (event.type === 'data') {
+      t.deepEqual(event.payload, {
+        bids: initData[2].bids,
+        asks: initData[2].asks,
+      });
+    } else {
+      t.fail(`Expected type "data", got "${event.type}"`);
+    }
+  });
+
+  // @ts-expect-error - Direct access
+  socket.__handlers.message({
+    data: JSON.stringify(initData[2]),
+  });
+});
+
+test('WrappedSocket#on with a message event of type data (via delta) sends back the right data', (t) => {
+  const socket = getSocket();
+
+  socket.on('message', (event) => {
+    if (event.type === 'data') {
+      t.deepEqual(event.payload, {
+        bids: runningData[0].bids,
+        asks: runningData[0].asks,
+      });
+    } else {
+      t.fail(`Expected type "data", got "${event.type}"`);
+    }
+  });
+
+  // @ts-expect-error - Direct access
+  socket.__handlers.message({
+    data: JSON.stringify(runningData[0]),
+  });
 });
