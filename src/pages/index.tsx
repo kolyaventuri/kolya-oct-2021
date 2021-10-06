@@ -2,9 +2,11 @@ import * as React from 'react';
 import Head from 'next/head';
 import {OrderBook} from '../components/order-book';
 import {Header} from '../components/header';
+import {useSocket} from '../hooks/use-socket';
 
 const Home = (): JSX.Element => {
-  const [ticker] = React.useState('XBTUSD');
+  const [ticker] = React.useState('PI_XBTUSD');
+  const [status, bids, asks] = useSocket(ticker);
 
   return (
     <>
@@ -12,8 +14,8 @@ const Home = (): JSX.Element => {
         <title>Order Book</title>
       </Head>
       <div>
-        <Header ticker={ticker} />
-        <OrderBook />
+        <Header ticker={ticker} status={status} />
+        <OrderBook bids={bids} asks={asks} />
       </div>
     </>
   );
