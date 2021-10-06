@@ -88,3 +88,14 @@ test('#useSocket changes to CONNECTED status upon recieving the "subscribed" mes
 
   t.is(result.current[0], ConnectionStatus.CONNECTED);
 });
+
+test('#useSocket changes to OFFLINE status upon recieving the "close" event', (t) => {
+  const {useSocket, events} = getFn();
+  const {result} = renderHook(() => useSocket('ticker'));
+
+  act(() => {
+    events.onclose();
+  });
+
+  t.is(result.current[0], ConnectionStatus.OFFLINE);
+});

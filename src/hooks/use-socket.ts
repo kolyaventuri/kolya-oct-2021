@@ -30,6 +30,10 @@ export const useSocket = (ticker: string): UseSocketResult => {
         setStatus(ConnectionStatus.CONNECTED);
       }
     });
+
+    socket.on('close', () => {
+      setStatus(ConnectionStatus.OFFLINE);
+    });
   }, [ticker, socket]);
 
   return [status, bid, ask];
