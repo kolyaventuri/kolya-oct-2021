@@ -22,7 +22,7 @@ interface SubscribedMessage {
   payload?: never;
 }
 
-interface DataMessage {
+export interface DataMessage {
   type: 'data';
   payload: {
     bid: Array<[number, number]>;

@@ -99,3 +99,32 @@ test('#useSocket changes to OFFLINE status upon recieving the "close" event', (t
 
   t.is(result.current[0], ConnectionStatus.OFFLINE);
 });
+
+test('#useSocket updates the bid and ask along with a data event', (t) => {
+  const {useSocket, events} = getFn();
+  const {result} = renderHook(() => useSocket('ticker'));
+
+  t.deepEqual(result.current[1], []);
+  t.deepEqual(result.current[2], []);
+
+  const event = {
+    type: 'data',
+    payload: {
+      bid: [
+        [1, 1],
+        [2, 2],
+      ],
+      ask: [
+        [3, 1],
+        [4, 2],
+      ],
+    },
+  };
+
+  act(() => {
+    events.onmessage(event);
+  });
+
+  t.deepEqual(result.current[1], event.payload.bid);
+  t.deepEqual(result.current[2], event.payload.ask);
+});

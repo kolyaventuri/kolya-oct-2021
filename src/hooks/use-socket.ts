@@ -1,7 +1,7 @@
 import * as React from 'react';
 import {FEED_ID} from '../constants/socket';
 import {ConnectionStatus} from '../types/socket';
-import {getSocket} from '../util/socket';
+import {DataMessage, getSocket} from '../util/socket';
 
 type UseSocketResult = [
   ConnectionStatus,
@@ -12,8 +12,8 @@ type UseSocketResult = [
 export const useSocket = (ticker: string): UseSocketResult => {
   const socket = React.useMemo(() => getSocket(), []);
   const [status, setStatus] = React.useState(ConnectionStatus.OFFLINE);
-  const [bid] = React.useState<Array<[number, number]>>([]);
-  const [ask] = React.useState<Array<[number, number]>>([]);
+  const [bid, setBid] = React.useState<Array<[number, number]>>([]);
+  const [ask, setAsk] = React.useState<Array<[number, number]>>([]);
 
   React.useEffect(() => {
     socket.on('open', () => {
@@ -25,14 +25,22 @@ export const useSocket = (ticker: string): UseSocketResult => {
       });
     });
 
-    socket.on('message', ({type}) => {
-      if (type === 'subscribed') {
-        setStatus(ConnectionStatus.CONNECTED);
-      }
-    });
-
     socket.on('close', () => {
       setStatus(ConnectionStatus.OFFLINE);
+    });
+
+    socket.on('message', (event) => {
+      if (event.type === 'subscribed') {
+        setStatus(ConnectionStatus.CONNECTED);
+        return;
+      }
+
+      if (event.type === 'data') {
+        const {bid, ask} = event.payload as DataMessage['payload'];
+
+        setBid(bid);
+        setAsk(ask);
+      }
     });
   }, [ticker, socket]);
 
