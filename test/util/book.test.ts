@@ -22,14 +22,16 @@ test('#updateBook does not mutate input book', (t) => {
     [1, 1],
     [2, 2],
   ] as Book;
-  const existing = [...input]; // Deep copy
 
   updateBook(input, [
     [1, 2],
     [2, 3],
   ]);
 
-  t.deepEqual(input, existing);
+  t.deepEqual(input, [
+    [1, 1],
+    [2, 2],
+  ]); // We could deep-copy, but to be explicit
 });
 
 test('#updateBook removes a price if size goes to 0', (t) => {

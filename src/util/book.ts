@@ -1,7 +1,10 @@
 import {Book} from '../types/book';
 
+// Fast deep-clone - avoids issues caused by pass by reference
+const cloneBook = (input: Book): Book => input.map((items) => [...items]);
+
 export const updateBook = (input: Book, newPrices: Book): Book => {
-  const book = input.slice(); // Fast deep copy
+  const book = cloneBook(input);
 
   for (const [price, size] of newPrices) {
     const index = book.findIndex(([bidPrice]) => bidPrice === price);
