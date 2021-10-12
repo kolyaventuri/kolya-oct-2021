@@ -3,16 +3,15 @@ import {FEED_ID} from '../constants/socket';
 import {ConnectionStatus} from '../types/socket';
 import {DataMessage, getSocket} from '../util/socket';
 
+type Book = Array<[number, number]>; // [price, size][]
+
 type UseSocketResult = [
   ConnectionStatus,
-  Array<[number, number]>, // Bid
-  Array<[number, number]>, // Ask
+  Book, // Bid
+  Book, // Ask
 ];
 
-const mutateBook = (
-  book: Array<[number, number]>,
-  newPrices: Array<[number, number]>,
-): void => {
+export const mutateBook = (book: Book, newPrices: Book): void => {
   for (const [price, size] of newPrices) {
     const index = book.findIndex(([bidPrice]) => bidPrice === price);
     if (index > -1) {
