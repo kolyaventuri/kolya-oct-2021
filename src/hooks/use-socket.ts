@@ -1,30 +1,15 @@
 import * as React from 'react';
 import {FEED_ID} from '../constants/socket';
+import {Book} from '../types/book';
 import {ConnectionStatus} from '../types/socket';
+import {updateBook as mutateBook} from '../util/book';
 import {DataMessage, getSocket} from '../util/socket';
-
-type Book = Array<[number, number]>; // [price, size][]
 
 type UseSocketResult = [
   ConnectionStatus,
   Book, // Bid
   Book, // Ask
 ];
-
-export const mutateBook = (book: Book, newPrices: Book): void => {
-  for (const [price, size] of newPrices) {
-    const index = book.findIndex(([bidPrice]) => bidPrice === price);
-    if (index > -1) {
-      if (size > 0) {
-        book[index][1] = size;
-      } else {
-        book.splice(index, 1);
-      }
-    } else if (index === -1 && price > 0) {
-      book.push([price, size]);
-    }
-  }
-};
 
 export const useSocket = (ticker: string): UseSocketResult => {
   const [status, setStatus] = React.useState(ConnectionStatus.OFFLINE);
