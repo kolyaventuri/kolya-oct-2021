@@ -16,7 +16,7 @@ export const useBook = (
   const [asks, setAsks, askRef] = useStatefulRef<Book>([]);
 
   React.useEffect(() => {
-    if (!socket || socket?.isOpen) {
+    if (!socket) {
       return;
     }
 

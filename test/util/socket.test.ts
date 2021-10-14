@@ -267,3 +267,16 @@ test('WrappedSocket#isOpen returns false if the socket ReadyState is NOT OPEN', 
 
   t.false(socket.isOpen);
 });
+
+test('WrappedSocket#on for event "open" emits immediately if socket is already open', (t) => {
+  const {socket} = getSocket();
+
+  // @ts-expect-error - Direct access
+  const stateStub = stub(socket.__socket, 'readyState');
+  stateStub.get(() => 1); // 1 = ReadyState.OPEN
+
+  const fn = stub();
+  socket.on('open', fn);
+
+  t.true(fn.called);
+});

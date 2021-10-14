@@ -100,6 +100,11 @@ export class WrappedSocket {
     this.__socket[handler] = (payload: any) => {
       this.__runHandler(event, payload);
     };
+
+    if (event === 'open' && this.isOpen) {
+      // Emit the open handler immediately if the socket is already open
+      this.__runHandler('open', undefined);
+    }
   }
 
   public send(event: 'subscribe', options: SubscribeOptions): void;

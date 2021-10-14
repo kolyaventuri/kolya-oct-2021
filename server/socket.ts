@@ -77,6 +77,7 @@ setInterval(() => {
       if (dataSets[sub]) {
         const index = conn.next;
 
+        console.log('--Send item', index)
         conn.socket.send(JSON.stringify(dataSets[sub].running[index]));
         conn.next += 1;
         if (conn.next >= dataSets[sub].running.length) {
