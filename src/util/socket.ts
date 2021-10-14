@@ -2,8 +2,8 @@ import {BOOK_URL} from '../constants/urls';
 import {SubscribeOptions, UnsubscribeOptions} from '../types/socket';
 
 type CallbackFn<T> = (event: T) => unknown;
-const events = ['open', 'error', 'close', 'message'] as const;
-type EventType = typeof events[number];
+type EventType = 'open' | 'error' | 'close' | 'message';
+type MessageType = 'subscribed' | 'data' | 'generic';
 
 const enum ReadyState {
   CONNECTING,
@@ -12,10 +12,38 @@ const enum ReadyState {
   CLOSED,
 }
 
+interface BaseSocketMessage {
+  type: MessageType;
+  payload: any;
+}
+
+interface SubscribedMessage {
+  type: 'subscribed';
+  payload?: never;
+}
+
+export interface DataMessage {
+  type: 'data';
+  payload: {
+    bids: Array<[number, number]>;
+    asks: Array<[number, number]>;
+  };
+}
+
+type SocketMessage = BaseSocketMessage | SubscribedMessage | DataMessage;
+
+interface EventData {
+  [key: string]: unknown;
+  event?: string;
+  feed?: string;
+}
+
 export class WrappedSocket {
   private __socket: WebSocket;
   private readonly __url: string;
-  private readonly __handlers: {[key in EventType]?: CallbackFn<any>} = {};
+  private readonly __handlers: {
+    [key in EventType]?: Array<CallbackFn<any>>;
+  } = {};
 
   constructor(url: string) {
     this.__url = url;
@@ -25,11 +53,58 @@ export class WrappedSocket {
 
   public on(event: 'open' | 'error', callback: CallbackFn<Event>): void;
   public on(event: 'close', callback: CallbackFn<CloseEvent>): void;
-  public on(event: 'message', callback: CallbackFn<MessageEvent>): void;
+  public on(event: 'message', callback: CallbackFn<SocketMessage>): void;
   public on(event: EventType, callback: CallbackFn<any>): void {
     const handler = `on${event}`;
-    this.__handlers[event] = callback;
-    this.__socket[handler] = callback;
+
+    let fn = callback;
+    if (event === 'message') {
+      fn = (event: MessageEvent) => {
+        let type: MessageType = 'generic';
+        let payload: unknown = event.data;
+
+        try {
+          const data = JSON.parse(event.data) as EventData;
+          payload = data;
+
+          if (data.event === 'subscribed') {
+            callback({type: 'subscribed'});
+            return;
+          }
+
+          // (kolyaventuri): Quick and dirty way to detect a delta / update
+          const isDelta = data.feed && data.bids && data.asks && !data.event;
+          if (data.feed?.endsWith('_snapshot') || isDelta) {
+            type = 'data';
+            const newPayload: DataMessage['payload'] = {
+              bids: data.bids as DataMessage['payload']['bids'],
+              asks: data.asks as DataMessage['payload']['asks'],
+            };
+
+            payload = newPayload;
+          }
+        } catch {}
+
+        callback({
+          type,
+          payload,
+        });
+      };
+    }
+
+    if (!this.__handlers[event]) {
+      this.__handlers[event] = [];
+    }
+
+    this.__handlers[event]?.push(fn);
+    this.__socket[handler] = (payload: any) => {
+      this.__runHandler(event, payload);
+    };
+
+    if (event === 'open' && this.isOpen) {
+      // Emit the open handler immediately if the socket is already open
+      this.__runHandler('open', undefined);
+    }
   }
 
   public send(event: 'subscribe', options: SubscribeOptions): void;
@@ -52,10 +127,24 @@ export class WrappedSocket {
     }
 
     this.__socket = new window.WebSocket(this.__url);
-    for (const [event, callback] of Object.entries(this.__handlers)) {
-      // @ts-expect-error - Event can only be one of EventType
-      // TODO: Resolve this type if possible
-      this.on(event, callback);
+    for (const [event, callbackArray] of Object.entries(this.__handlers)) {
+      for (const callback of callbackArray) {
+        // @ts-expect-error - Event can only be one of EventType
+        // TODO: Resolve this type if possible
+        this.on(event, callback);
+      }
+    }
+  }
+
+  public get isOpen(): boolean {
+    return this.__socket.readyState === ReadyState.OPEN;
+  }
+
+  private __runHandler(handler: string, payload: any): void {
+    const handlerFns = this.__handlers[handler] as Array<CallbackFn<any>>;
+
+    for (const fn of handlerFns) {
+      fn(payload);
     }
   }
 }

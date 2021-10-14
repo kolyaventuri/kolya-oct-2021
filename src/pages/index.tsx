@@ -1,19 +1,26 @@
-import React from 'react';
+import * as React from 'react';
 import Head from 'next/head';
+import {OrderBook} from '../components/order-book';
+import {Header} from '../components/header';
+import {useSocket} from '../hooks/use-socket';
+import {useBook} from '../hooks/use-book';
 
-class Home extends React.Component {
-  render(): JSX.Element {
-    return (
+const Home = (): JSX.Element => {
+  const [ticker] = React.useState('XBTUSD');
+  const [status, socket] = useSocket();
+  const [bid, ask] = useBook(ticker, socket);
+
+  return (
+    <>
+      <Head>
+        <title>Order Book</title>
+      </Head>
       <div>
-        <Head>
-          <title>Amplify App</title>
-        </Head>
-        <section className="section bg-black">
-          <h1>Amplify App</h1>
-        </section>
+        <Header ticker={ticker} status={status} />
+        <OrderBook bids={bid} asks={ask} />
       </div>
-    );
-  }
-}
+    </>
+  );
+};
 
 export default Home;
