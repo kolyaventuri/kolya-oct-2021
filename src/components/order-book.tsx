@@ -1,8 +1,9 @@
 import * as React from 'react';
+import {Book} from '../types/book';
 
 interface Props {
-  bids: Array<[number, number]>;
-  asks: Array<[number, number]>;
+  bids: Book;
+  asks: Book;
 }
 
 export const OrderBook = ({bids, asks}: Props): JSX.Element => (
