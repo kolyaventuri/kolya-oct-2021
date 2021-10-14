@@ -8,7 +8,7 @@ import {useBook} from '../hooks/use-book';
 const Home = (): JSX.Element => {
   const [ticker] = React.useState('XBTUSD');
   const [status, socket] = useSocket();
-  const [bid, ask] = useBook(ticker, socket);
+  const [bid, ask, spread] = useBook(ticker, socket);
 
   return (
     <>
@@ -17,7 +17,7 @@ const Home = (): JSX.Element => {
       </Head>
       <div>
         <Header ticker={ticker} status={status} />
-        <OrderBook bids={bid} asks={ask} />
+        <OrderBook bids={bid} asks={ask} spread={spread} />
       </div>
     </>
   );

@@ -2,6 +2,7 @@
 _Example WebSocket app, reading off the CryptoFacilities WS API_
 
 [![XO code style](https://img.shields.io/badge/code_style-XO-5ed9c7.svg)](https://github.com/xojs/xo)
+[![CICD Status](https://github.com/kolyaventuri/kolya-oct-2021/actions/workflows/node.js.yml/badge.svg)](https://github.com/kolyaventuri/kolya-oct-2021/actions/workflows/node.js.yml)
 ---
 
 # Overview

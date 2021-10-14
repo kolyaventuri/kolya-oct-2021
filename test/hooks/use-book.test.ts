@@ -96,8 +96,8 @@ test('#useBook sets the bid and ask along with a data event', (t) => {
   });
 
   t.deepEqual(result.current[0], [
-    [1, 1, 1],
-    [2, 2, 3],
+    [2, 2, 2],
+    [1, 1, 3],
   ]);
   t.deepEqual(result.current[1], [
     [3, 1, 1],
@@ -141,8 +141,8 @@ test('#useBook can update the bid and ask along with a data event', (t) => {
   });
 
   t.deepEqual(result.current[0], [
-    [1, 3, 3],
-    [2, 2, 5],
+    [2, 2, 2],
+    [1, 3, 5],
   ]);
   t.deepEqual(result.current[1], [[3, 1, 1]]);
 });
@@ -188,4 +188,97 @@ test('#useBook will remove 0-size items', (t) => {
     0,
     `Found the folloing 0-size asks: ${JSON.stringify(zeroAsks)}`,
   );
+});
+
+test('#useBook calculates the spread', (t) => {
+  const {events, socket} = getStubs();
+  const {result} = renderHook(() => useBook('ticker', socket));
+
+  t.deepEqual(result.current[0], []);
+  t.deepEqual(result.current[1], []);
+
+  const event = {
+    type: 'data',
+    payload: {
+      bids: [
+        [34_062.5, 1],
+        [34_052.5, 2],
+      ],
+      asks: [
+        [34_079.5, 1],
+        [34_094, 2],
+      ],
+    },
+  };
+
+  act(() => {
+    events.onmessage(event);
+  });
+
+  t.deepEqual(result.current[2], {
+    value: '17.0',
+    percentage: '0.05%',
+  });
+});
+
+test('#useBook calculates smaller spreads', (t) => {
+  const {events, socket} = getStubs();
+  const {result} = renderHook(() => useBook('ticker', socket));
+
+  t.deepEqual(result.current[0], []);
+  t.deepEqual(result.current[1], []);
+
+  const event = {
+    type: 'data',
+    payload: {
+      bids: [
+        [34_062.5, 1],
+        [34_052.5, 2],
+      ],
+      asks: [
+        [34_067.5, 1],
+        [34_094, 2],
+      ],
+    },
+  };
+
+  act(() => {
+    events.onmessage(event);
+  });
+
+  t.deepEqual(result.current[2], {
+    value: '5.0',
+    percentage: '0.01%',
+  });
+});
+
+test('#useBook calculates large spreads', (t) => {
+  const {events, socket} = getStubs();
+  const {result} = renderHook(() => useBook('ticker', socket));
+
+  t.deepEqual(result.current[0], []);
+  t.deepEqual(result.current[1], []);
+
+  const event = {
+    type: 'data',
+    payload: {
+      bids: [
+        [34_062.5, 1],
+        [34_052.5, 2],
+      ],
+      asks: [
+        [34_167.5, 1],
+        [34_194, 2],
+      ],
+    },
+  };
+
+  act(() => {
+    events.onmessage(event);
+  });
+
+  t.deepEqual(result.current[2], {
+    value: '105.0',
+    percentage: '0.31%',
+  });
 });

@@ -1,12 +1,26 @@
 import * as React from 'react';
 import {FEED_ID} from '../constants/socket';
 
-import {Book} from '../types/book';
+import {Book, Spread} from '../types/book';
 import {updateBook} from '../util/book';
 import {DataMessage, WrappedSocket} from '../util/socket';
 import {useStatefulRef} from './use-stateful-ref';
 
-type UseBookResult = [Book, Book];
+const calculateSpread = (bid: Book, ask: Book): Spread => {
+  const topBid = bid[0][0];
+  const topAsk = ask[0][0];
+
+  const value = Math.abs(topBid - topAsk);
+  const percentage = (value / topBid) * 100;
+  const precision = Math.floor(value).toString(10).length + 1;
+
+  return {
+    value: value.toPrecision(precision),
+    percentage: percentage.toFixed(2) + '%',
+  };
+};
+
+type UseBookResult = [Book, Book, Spread];
 
 export const useBook = (
   ticker: string,
@@ -14,6 +28,10 @@ export const useBook = (
 ): UseBookResult => {
   const [bids, setBids, bidRef] = useStatefulRef<Book>([]);
   const [asks, setAsks, askRef] = useStatefulRef<Book>([]);
+  const [spread, setSpread] = React.useState<Spread>({
+    value: '0.0',
+    percentage: '0.0',
+  });
 
   React.useEffect(() => {
     if (!socket) {
@@ -30,14 +48,22 @@ export const useBook = (
     socket.on('message', (event) => {
       if (event.type === 'data') {
         const {payload} = event as DataMessage;
-        const newBids = updateBook(bidRef.current, payload.bids);
-        const newAsks = updateBook(askRef.current, payload.asks);
+        const newBids = updateBook({
+          input: bidRef.current,
+          newPrices: payload.bids,
+        });
+        const newAsks = updateBook({
+          input: askRef.current,
+          newPrices: payload.asks,
+          smallToLarge: true,
+        });
 
         setBids(newBids);
         setAsks(newAsks);
+        setSpread(calculateSpread(newBids, newAsks));
       }
     });
   }, [ticker, socket]);
 
-  return [bids, asks];
+  return [bids, asks, spread];
 };
