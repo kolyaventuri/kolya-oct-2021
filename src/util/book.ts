@@ -3,7 +3,17 @@ import {Book, InputBook} from '../types/book';
 // Fast deep-clone - avoids issues caused by pass by reference
 const cloneBook = (input: Book): Book => input.map((items) => [...items]);
 
-export const updateBook = (input: Book, newPrices: InputBook): Book => {
+interface UpdateBookArgs {
+  input: Book;
+  newPrices: InputBook;
+  smallToLarge?: boolean;
+}
+
+export const updateBook = ({
+  input,
+  newPrices,
+  smallToLarge = false,
+}: UpdateBookArgs): Book => {
   if (newPrices.length === 0) {
     return input;
   }
@@ -24,7 +34,11 @@ export const updateBook = (input: Book, newPrices: InputBook): Book => {
     }
   }
 
-  book.sort(([priceA], [priceB]) => priceB - priceA);
+  if (smallToLarge) {
+    book.sort(([priceA], [priceB]) => priceA - priceB);
+  } else {
+    book.sort(([priceA], [priceB]) => priceB - priceA);
+  }
 
   let total = 0;
   return book.map((entry) => {

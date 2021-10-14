@@ -10,16 +10,35 @@ test('#updateBook returns a new book, with updated sizes, ordered largest to sma
     [2, 2, 2],
     [1, 1, 3],
   ] as Book;
-  const updates = [
+  const newPrices = [
     [1, 2],
     [2, 3],
   ] as InputBook;
 
-  const result = updateBook(input, updates);
+  const result = updateBook({input, newPrices});
 
   const expected = [
     [2, 3, 3],
     [1, 2, 5],
+  ];
+  t.deepEqual(result, expected);
+});
+
+test('#updateBook can optionally order smallest to largest (asks)', (t) => {
+  const input = [
+    [2, 2, 2],
+    [1, 1, 3],
+  ] as Book;
+  const newPrices = [
+    [1, 2],
+    [2, 3],
+  ] as InputBook;
+
+  const result = updateBook({input, newPrices, smallToLarge: true});
+
+  const expected = [
+    [1, 2, 2],
+    [2, 3, 5],
   ];
   t.deepEqual(result, expected);
 });
@@ -30,10 +49,13 @@ test('#updateBook does not mutate input book', (t) => {
     [1, 1, 3],
   ] as Book;
 
-  updateBook(input, [
-    [1, 2],
-    [2, 3],
-  ]);
+  updateBook({
+    input,
+    newPrices: [
+      [1, 2],
+      [2, 3],
+    ],
+  });
 
   t.deepEqual(input, [
     [2, 2, 2],
@@ -47,7 +69,7 @@ test('#updateBook removes a price if size goes to 0', (t) => {
     [2, 2, 3],
     [3, 3, 6],
   ] as Book;
-  const result = updateBook(input, [[2, 0]]);
+  const result = updateBook({input, newPrices: [[2, 0]]});
 
   t.deepEqual(result, [
     [3, 3, 3],
@@ -62,10 +84,13 @@ test('#updateBook removes multiple prices if sizes go to 0', (t) => {
     [3, 3, 6],
     [4, 4, 10],
   ] as Book;
-  const result = updateBook(input, [
-    [2, 0],
-    [1, 0],
-  ]);
+  const result = updateBook({
+    input,
+    newPrices: [
+      [2, 0],
+      [1, 0],
+    ],
+  });
 
   t.deepEqual(result, [
     [4, 4, 4],
@@ -79,7 +104,7 @@ test('#updateBook only mutates the price(s) that are input', (t) => {
     [2, 2, 1],
     [3, 3, 1],
   ] as Book;
-  const result = updateBook(input, [[3, 1]]);
+  const result = updateBook({input, newPrices: [[3, 1]]});
 
   t.deepEqual(result, [
     [3, 1, 1],
@@ -93,7 +118,7 @@ test('#updateBook returns the same book if nothing changed', (t) => {
     [2, 2, 3],
     [1, 1, 1],
   ] as Book;
-  const result = updateBook(input, []);
+  const result = updateBook({input, newPrices: []});
 
   t.deepEqual(result, input);
 });
@@ -105,10 +130,13 @@ test('#updateBook can remove and mutate in the same request', (t) => {
     [3, 3, 6],
     [4, 4, 10],
   ] as Book;
-  const result = updateBook(input, [
-    [3, 1],
-    [2, 0],
-  ]);
+  const result = updateBook({
+    input,
+    newPrices: [
+      [3, 1],
+      [2, 0],
+    ],
+  });
 
   t.deepEqual(result, [
     [4, 4, 4],
@@ -119,9 +147,9 @@ test('#updateBook can remove and mutate in the same request', (t) => {
 
 test('#updateBook handles real data as expected (bids going to 0)', (t) => {
   const input = initData[2].bids as Book;
-  const newData = runningData[0].bids as InputBook;
+  const newPrices = runningData[0].bids as InputBook;
 
-  const result = updateBook(input, newData);
+  const result = updateBook({input, newPrices});
   const zeroBids = result.filter(([, size]) => size === 0);
 
   t.is(
@@ -146,7 +174,7 @@ test('#updateBook should be able to return the totals for each side', (t) => {
     [1000, 50, 1150],
   ];
 
-  const result = updateBook([], bidBook);
+  const result = updateBook({input: [], newPrices: bidBook});
 
   t.deepEqual(result, expected);
 });
