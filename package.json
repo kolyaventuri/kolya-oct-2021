@@ -7,7 +7,7 @@
     "start": "next start",
     "test": "npm-run-all lint:* test:*",
     "test:unit": "cross-env TS_NODE_PROJECT=tsconfig/tsconfig.ava.json ava",
-    "cicd:test": "tsc --noEmit && xo --fix && cross-env TS_NODE_PROJECT=tsconfig/tsconfig.ava.json ava --loader=ts-node/esm",
+    "cicd:test": "npm-run-all lint:* && npm run test:unit -- --timeout=5m",
     "lint": "npm-run-all lint:*",
     "lint:tsc": "tsc --noEmit",
     "lint:lint": "xo --fix",
