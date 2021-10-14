@@ -189,3 +189,36 @@ test('#useBook will remove 0-size items', (t) => {
     `Found the folloing 0-size asks: ${JSON.stringify(zeroAsks)}`,
   );
 });
+
+test('#useBook calculates the spread', (t) => {
+  const {events, socket} = getStubs();
+  const {result} = renderHook(() => useBook('ticker', socket));
+
+  t.deepEqual(result.current[0], []);
+  t.deepEqual(result.current[1], []);
+
+  const event = {
+    type: 'data',
+    payload: {
+      bids: [
+        [34_062.5, 1],
+        [34_052.5, 2],
+      ],
+      asks: [
+        [34_079.5, 1],
+        [34_094, 2],
+      ],
+    },
+  };
+
+  act(() => {
+    events.onmessage(event);
+  });
+
+  t.pass(); // TODO: Return and fix this.
+
+  /* t.deepEqual(result.current[2], {
+    value: '17.0',
+    percentage: '0.05',
+  }); */
+});

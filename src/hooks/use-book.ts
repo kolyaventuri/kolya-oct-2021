@@ -1,12 +1,12 @@
 import * as React from 'react';
 import {FEED_ID} from '../constants/socket';
 
-import {Book} from '../types/book';
+import {Book, Spread} from '../types/book';
 import {updateBook} from '../util/book';
 import {DataMessage, WrappedSocket} from '../util/socket';
 import {useStatefulRef} from './use-stateful-ref';
 
-type UseBookResult = [Book, Book];
+type UseBookResult = [Book, Book, Spread];
 
 export const useBook = (
   ticker: string,
@@ -14,6 +14,7 @@ export const useBook = (
 ): UseBookResult => {
   const [bids, setBids, bidRef] = useStatefulRef<Book>([]);
   const [asks, setAsks, askRef] = useStatefulRef<Book>([]);
+  const [spread] = React.useState<Spread>({value: '0.0', percentage: '0.0'});
 
   React.useEffect(() => {
     if (!socket) {
@@ -39,5 +40,5 @@ export const useBook = (
     });
   }, [ticker, socket]);
 
-  return [bids, asks];
+  return [bids, asks, spread];
 };

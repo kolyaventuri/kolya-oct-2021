@@ -4,6 +4,10 @@ import {Book, InputBook} from '../types/book';
 const cloneBook = (input: Book): Book => input.map((items) => [...items]);
 
 export const updateBook = (input: Book, newPrices: InputBook): Book => {
+  if (newPrices.length === 0) {
+    return input;
+  }
+
   const book = cloneBook(input);
 
   for (const [price, size] of newPrices) {
@@ -20,7 +24,7 @@ export const updateBook = (input: Book, newPrices: InputBook): Book => {
     }
   }
 
-  book.sort(([priceA], [priceB]) => priceA - priceB);
+  book.sort(([priceA], [priceB]) => priceB - priceA);
 
   let total = 0;
   return book.map((entry) => {
