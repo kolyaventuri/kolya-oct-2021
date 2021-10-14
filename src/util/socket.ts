@@ -120,6 +120,10 @@ export class WrappedSocket {
       this.on(event, callback);
     }
   }
+
+  public get isOpen(): boolean {
+    return this.__socket.readyState === ReadyState.OPEN;
+  }
 }
 
 let socket: WrappedSocket;

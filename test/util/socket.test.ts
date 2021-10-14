@@ -216,3 +216,20 @@ test('WrappedSocket#on with a message event of type data (via delta) sends back 
     data: JSON.stringify(runningData[0]),
   });
 });
+
+test('WrappedSocket#isOpen returns true if the socket ReadyState is OPEN', (t) => {
+  const socket = getSocket();
+  // @ts-expect-error - Direct access
+  const stateStub = stub(socket.__socket, 'readyState');
+  stateStub.get(() => 1); // 1 = ReadyState.OPEN
+
+  t.true(socket.isOpen);
+
+  stateStub.restore();
+});
+
+test('WrappedSocket#isOpen returns false if the socket ReadyState is NOT OPEN', (t) => {
+  const socket = getSocket();
+
+  t.false(socket.isOpen);
+});

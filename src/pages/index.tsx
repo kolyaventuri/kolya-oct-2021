@@ -5,7 +5,7 @@ import {Header} from '../components/header';
 import {useSocket} from '../hooks/use-socket';
 
 const Home = (): JSX.Element => {
-  const [ticker] = React.useState('PI_XBTUSD');
+  const [ticker] = React.useState('XBTUSD');
   const [status] = useSocket();
 
   return (
