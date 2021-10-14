@@ -6,6 +6,9 @@ import {FEED_ID} from '../../src/constants/socket';
 import {useBook} from '../../src/hooks/use-book';
 import {WrappedSocket} from '../../src/util/socket';
 
+import initData from '../../fixtures/pi_xbtusd.init.json';
+import runningData from '../../fixtures/pi_xbtusd.json';
+
 // https://stackoverflow.com/a/46634877/3685123
 type Mutable<T> = {-readonly [P in keyof T]: T[P]};
 
@@ -136,4 +139,47 @@ test('#useBook can update the bid and ask along with a data event', (t) => {
     [2, 2],
   ]);
   t.deepEqual(result.current[1], [[3, 1]]);
+});
+
+test('#useBook will remove 0-size items', (t) => {
+  const {events, socket} = getStubs();
+  const {result} = renderHook(() => useBook('ticker', socket));
+
+  t.deepEqual(result.current[0], []);
+  t.deepEqual(result.current[1], []);
+
+  const event = {
+    type: 'data',
+    payload: {
+      bids: initData[2].bids,
+      asks: initData[2].asks,
+    },
+  };
+
+  const event2 = {
+    type: 'data',
+    payload: {
+      bids: runningData[0].bids,
+      asks: runningData[0].asks,
+    },
+  };
+  act(() => {
+    events.onmessage(event);
+  });
+  act(() => {
+    events.onmessage(event2);
+  });
+
+  const zeroBids = result.current[0].filter(([, size]) => size === 0);
+  const zeroAsks = result.current[1].filter(([, size]) => size === 0);
+  t.is(
+    zeroBids.length,
+    0,
+    `Found the folloing 0-size bids: ${JSON.stringify(zeroBids)}`,
+  );
+  t.is(
+    zeroAsks.length,
+    0,
+    `Found the folloing 0-size asks: ${JSON.stringify(zeroAsks)}`,
+  );
 });

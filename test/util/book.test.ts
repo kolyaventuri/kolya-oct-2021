@@ -2,6 +2,9 @@ import test from 'ava';
 import {Book} from '../../src/types/book';
 import {updateBook} from '../../src/util/book';
 
+import initData from '../../fixtures/pi_xbtusd.init.json';
+import runningData from '../../fixtures/pi_xbtusd.json';
+
 test('#updateBook returns a new book, with updated sizes', (t) => {
   const input = [
     [1, 1],
@@ -48,6 +51,24 @@ test('#updateBook removes a price if size goes to 0', (t) => {
   ]);
 });
 
+test('#updateBook removes multiple prices if sizes go to 0', (t) => {
+  const input = [
+    [1, 1],
+    [2, 2],
+    [3, 3],
+    [4, 4],
+  ] as Book;
+  const result = updateBook(input, [
+    [2, 0],
+    [1, 0],
+  ]);
+
+  t.deepEqual(result, [
+    [3, 3],
+    [4, 4],
+  ]);
+});
+
 test('#updateBook only mutates the price(s) that are input', (t) => {
   const input = [
     [1, 1],
@@ -90,4 +111,20 @@ test('#updateBook can remove and mutate in the same request', (t) => {
     [3, 1],
     [4, 4],
   ]);
+});
+
+test('#updateBook handles real data as expected (bids going to 0)', (t) => {
+  const input = initData[2].bids as Book;
+  const newData = runningData[0].bids as Book;
+
+  const result = updateBook(input, newData);
+  const zeroBids = result.filter(([, size]) => size === 0);
+
+  t.is(
+    zeroBids.length,
+    0,
+    `Found the following 0-size bids after updateBook: ${JSON.stringify(
+      zeroBids,
+    )}`,
+  );
 });
