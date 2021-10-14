@@ -95,3 +95,45 @@ test('#useBook sets the bid and ask along with a data event', (t) => {
   t.deepEqual(result.current[0], event.payload.bids);
   t.deepEqual(result.current[1], event.payload.asks);
 });
+
+test('#useBook can update the bid and ask along with a data event', (t) => {
+  const {events, socket} = getStubs();
+  const {result} = renderHook(() => useBook('ticker', socket));
+
+  t.deepEqual(result.current[0], []);
+  t.deepEqual(result.current[1], []);
+
+  const event = {
+    type: 'data',
+    payload: {
+      bids: [
+        [1, 1],
+        [2, 2],
+      ],
+      asks: [
+        [3, 1],
+        [4, 2],
+      ],
+    },
+  };
+
+  const event2 = {
+    type: 'data',
+    payload: {
+      bids: [[1, 3]],
+      asks: [[4, 0]],
+    },
+  };
+  act(() => {
+    events.onmessage(event);
+  });
+  act(() => {
+    events.onmessage(event2);
+  });
+
+  t.deepEqual(result.current[0], [
+    [1, 3],
+    [2, 2],
+  ]);
+  t.deepEqual(result.current[1], [[3, 1]]);
+});

@@ -2,7 +2,9 @@ import * as React from 'react';
 import {FEED_ID} from '../constants/socket';
 
 import {Book} from '../types/book';
+import {updateBook} from '../util/book';
 import {DataMessage, WrappedSocket} from '../util/socket';
+import {useStatefulRef} from './use-stateful-ref';
 
 type UseBookResult = [Book, Book];
 
@@ -10,8 +12,8 @@ export const useBook = (
   ticker: string,
   socket: WrappedSocket | undefined,
 ): UseBookResult => {
-  const [bids, setBids] = React.useState<Book>([]);
-  const [asks, setAsks] = React.useState<Book>([]);
+  const [bids, setBids, bidRef] = useStatefulRef<Book>([]);
+  const [asks, setAsks, askRef] = useStatefulRef<Book>([]);
 
   React.useEffect(() => {
     if (!socket || socket?.isOpen) {
@@ -28,8 +30,8 @@ export const useBook = (
     socket.on('message', (event) => {
       if (event.type === 'data') {
         const {payload} = event as DataMessage;
-        const newBids = payload.bids;
-        const newAsks = payload.asks;
+        const newBids = updateBook(bidRef.current, payload.bids);
+        const newAsks = updateBook(askRef.current, payload.asks);
 
         setBids(newBids);
         setAsks(newAsks);
