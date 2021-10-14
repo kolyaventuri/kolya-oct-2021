@@ -95,8 +95,14 @@ test('#useBook sets the bid and ask along with a data event', (t) => {
     events.onmessage(event);
   });
 
-  t.deepEqual(result.current[0], event.payload.bids);
-  t.deepEqual(result.current[1], event.payload.asks);
+  t.deepEqual(result.current[0], [
+    [1, 1, 1],
+    [2, 2, 3],
+  ]);
+  t.deepEqual(result.current[1], [
+    [3, 1, 1],
+    [4, 2, 3],
+  ]);
 });
 
 test('#useBook can update the bid and ask along with a data event', (t) => {
@@ -135,10 +141,10 @@ test('#useBook can update the bid and ask along with a data event', (t) => {
   });
 
   t.deepEqual(result.current[0], [
-    [1, 3],
-    [2, 2],
+    [1, 3, 3],
+    [2, 2, 5],
   ]);
-  t.deepEqual(result.current[1], [[3, 1]]);
+  t.deepEqual(result.current[1], [[3, 1, 1]]);
 });
 
 test('#useBook will remove 0-size items', (t) => {
