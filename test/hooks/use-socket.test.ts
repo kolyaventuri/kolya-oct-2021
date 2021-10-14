@@ -1,29 +1,17 @@
 import test from 'ava';
 import proxyquire from 'proxyquire';
-import {stub} from 'sinon';
 import {act, renderHook} from '@testing-library/react-hooks';
 
-import {FEED_ID} from '../../src/constants/socket';
 import {useSocket as realUseSocket} from '../../src/hooks/use-socket';
 import {ConnectionStatus} from '../../src/types/socket';
 
 type CallbackFn = (...args: any[]) => void;
 const getFn = () => {
   const events: Record<string, CallbackFn> = {};
-  const actions = {
-    send: stub(),
-    close: stub(),
-    open: stub(),
-  };
   const getSocket = () => ({
     on(event: string, callback: (...args: any[]) => void) {
       events[`on${event}`] = callback;
     },
-    send(...args: any[]) {
-      actions.send(...args);
-    },
-    close() {},
-    open() {},
   });
 
   const {useSocket} = proxyquire.noCallThru()<{
@@ -32,22 +20,21 @@ const getFn = () => {
     '../util/socket': {getSocket},
   });
 
-  return {useSocket, events, actions};
+  return {useSocket, events};
 };
 
-test('#useSocket returns the status, and a bid and ask array', (t) => {
+test('#useSocket returns the status, and an initially undefined socket', (t) => {
   const {useSocket} = getFn();
-  const {result} = renderHook(() => useSocket('ticker'));
-  const [status, bid, ask] = result.current;
+  const {result} = renderHook(() => useSocket());
+  const [status, socket] = result.current;
 
   t.is(status, ConnectionStatus.OFFLINE);
-  t.deepEqual(bid, []);
-  t.deepEqual(ask, []);
+  t.is(socket, undefined);
 });
 
 test('#useSocket sets the connection status to CONNECTING on open', (t) => {
   const {useSocket, events} = getFn();
-  const {result} = renderHook(() => useSocket('ticker'));
+  const {result} = renderHook(() => useSocket());
 
   act(() => {
     events.onopen();
@@ -56,30 +43,13 @@ test('#useSocket sets the connection status to CONNECTING on open', (t) => {
   t.is(result.current[0], ConnectionStatus.CONNECTING);
 });
 
-test('#useSocket attempts to subscribe to the ticker after open', (t) => {
-  const {useSocket, events, actions} = getFn();
-
-  renderHook(() => useSocket('ticker'));
-
-  act(() => {
-    events.onopen();
-  });
-
-  t.true(
-    actions.send.calledWith('subscribe', {
-      feed: FEED_ID,
-      product_ids: ['ticker'],
-    }),
-  );
-});
-
 test('#useSocket changes to CONNECTED status upon recieving the "subscribed" message', (t) => {
   // (kolyaventuri): Pre-parsed as part of the socket. See util/socket.ts
   const event = {
     type: 'subscribed',
   };
   const {useSocket, events} = getFn();
-  const {result} = renderHook(() => useSocket('ticker'));
+  const {result} = renderHook(() => useSocket());
 
   act(() => {
     events.onopen();
@@ -91,120 +61,11 @@ test('#useSocket changes to CONNECTED status upon recieving the "subscribed" mes
 
 test('#useSocket changes to OFFLINE status upon recieving the "close" event', (t) => {
   const {useSocket, events} = getFn();
-  const {result} = renderHook(() => useSocket('ticker'));
+  const {result} = renderHook(() => useSocket());
 
   act(() => {
     events.onclose();
   });
 
   t.is(result.current[0], ConnectionStatus.OFFLINE);
-});
-
-test('#useSocket sets the bid and ask along with a data event', (t) => {
-  const {useSocket, events} = getFn();
-  const {result} = renderHook(() => useSocket('ticker'));
-
-  t.deepEqual(result.current[1], []);
-  t.deepEqual(result.current[2], []);
-
-  const event = {
-    type: 'data',
-    payload: {
-      bids: [
-        [1, 1],
-        [2, 2],
-      ],
-      asks: [
-        [3, 1],
-        [4, 2],
-      ],
-    },
-  };
-
-  act(() => {
-    events.onmessage(event);
-  });
-
-  t.deepEqual(result.current[1], event.payload.bids);
-  t.deepEqual(result.current[2], event.payload.asks);
-});
-
-test('#useSocket updates the bid and ask with a subsequent data event', (t) => {
-  const {useSocket, events} = getFn();
-  const {result} = renderHook(() => useSocket('ticker'));
-
-  const event1 = {
-    type: 'data',
-    payload: {
-      bids: [
-        [1, 1],
-        [2, 2],
-      ],
-      asks: [
-        [3, 1],
-        [4, 2],
-      ],
-    },
-  };
-
-  const event2 = {
-    type: 'data',
-    payload: {
-      bids: [[1, 3]],
-      asks: [
-        [4, 4],
-        [5, 1],
-      ],
-    },
-  };
-
-  act(() => {
-    events.onmessage(event1);
-    events.onmessage(event2);
-  });
-
-  t.deepEqual(result.current[1], [
-    [1, 3],
-    [2, 2],
-  ]);
-  t.deepEqual(result.current[2], [
-    [3, 1],
-    [4, 4],
-    [5, 1],
-  ]);
-});
-
-test('#useSocket removes 0-size bids', (t) => {
-  const {useSocket, events} = getFn();
-  const {result} = renderHook(() => useSocket('ticker'));
-
-  const event1 = {
-    type: 'data',
-    payload: {
-      bids: [
-        [1, 1],
-        [2, 2],
-      ],
-      asks: [
-        [3, 1],
-        [4, 2],
-      ],
-    },
-  };
-
-  const event2 = {
-    type: 'data',
-    payload: {
-      bids: [[1, 0]],
-      asks: [],
-    },
-  };
-
-  act(() => {
-    events.onmessage(event1);
-    events.onmessage(event2);
-  });
-
-  t.deepEqual(result.current[1], [[2, 2]]);
-  t.deepEqual(result.current[2], event1.payload.asks);
 });

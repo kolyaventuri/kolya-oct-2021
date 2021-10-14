@@ -6,7 +6,7 @@ import {useSocket} from '../hooks/use-socket';
 
 const Home = (): JSX.Element => {
   const [ticker] = React.useState('PI_XBTUSD');
-  const [status, bids, asks] = useSocket(ticker);
+  const [status] = useSocket();
 
   return (
     <>
@@ -15,7 +15,7 @@ const Home = (): JSX.Element => {
       </Head>
       <div>
         <Header ticker={ticker} status={status} />
-        <OrderBook bids={bids} asks={asks} />
+        <OrderBook bids={[]} asks={[]} />
       </div>
     </>
   );
