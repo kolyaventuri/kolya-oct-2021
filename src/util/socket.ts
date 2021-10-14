@@ -41,7 +41,9 @@ interface EventData {
 export class WrappedSocket {
   private __socket: WebSocket;
   private readonly __url: string;
-  private readonly __handlers: {[key in EventType]?: CallbackFn<any>} = {};
+  private readonly __handlers: {
+    [key in EventType]?: Array<CallbackFn<any>>;
+  } = {};
 
   constructor(url: string) {
     this.__url = url;
@@ -90,8 +92,14 @@ export class WrappedSocket {
       };
     }
 
-    this.__handlers[event] = fn;
-    this.__socket[handler] = fn;
+    if (!this.__handlers[event]) {
+      this.__handlers[event] = [];
+    }
+
+    this.__handlers[event]?.push(fn);
+    this.__socket[handler] = (payload: any) => {
+      this.__runHandler(event, payload);
+    };
   }
 
   public send(event: 'subscribe', options: SubscribeOptions): void;
@@ -114,15 +122,25 @@ export class WrappedSocket {
     }
 
     this.__socket = new window.WebSocket(this.__url);
-    for (const [event, callback] of Object.entries(this.__handlers)) {
-      // @ts-expect-error - Event can only be one of EventType
-      // TODO: Resolve this type if possible
-      this.on(event, callback);
+    for (const [event, callbackArray] of Object.entries(this.__handlers)) {
+      for (const callback of callbackArray) {
+        // @ts-expect-error - Event can only be one of EventType
+        // TODO: Resolve this type if possible
+        this.on(event, callback);
+      }
     }
   }
 
   public get isOpen(): boolean {
     return this.__socket.readyState === ReadyState.OPEN;
+  }
+
+  private __runHandler(handler: string, payload: any): void {
+    const handlerFns = this.__handlers[handler] as Array<CallbackFn<any>>;
+
+    for (const fn of handlerFns) {
+      fn(payload);
+    }
   }
 }
 
