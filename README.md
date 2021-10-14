@@ -2,6 +2,7 @@
 _Example WebSocket app, reading off the CryptoFacilities WS API_
 
 [![XO code style](https://img.shields.io/badge/code_style-XO-5ed9c7.svg)](https://github.com/xojs/xo)
+[![Build Status](https://codebuild.us-west-2.amazonaws.com/badges?uuid=eyJlbmNyeXB0ZWREYXRhIjoielZxQ0xyWnhXQ2VhR2M3VUZrTExVZUErMitEeTN0YXdwdFdZUEdERnJvTEZkR3JaVi8zc1FFeTd5UktMTEJQUTFKNU55aVJ6cXI1Qkswd1AxQlJEK25ZPSIsIml2UGFyYW1ldGVyU3BlYyI6InVka2ZkOWNpM0hZeHB0a2oiLCJtYXRlcmlhbFNldFNlcmlhbCI6MX0%3D&branch=master)](https://us-west-2.codebuild.aws.amazon.com/project/eyJlbmNyeXB0ZWREYXRhIjoidndiVCtmTlNhRFIvOFVFejNoWDJPaHNVcDMzWTlIVTRRR1FUT1YzMEFpMUcrN3haZklCYTN6TzhvMERLWnVCNWJuN0haOE93YjRLOFdBSytKbWw1amtOdnUrOHg2Q2tFN01wUWEyVUVnUT09IiwiaXZQYXJhbWV0ZXJTcGVjIjoiaWZLTklXam4wSDh1bGl0KyIsIm1hdGVyaWFsU2V0U2VyaWFsIjoxfQ%3D%3D)
 ---
 
 # Overview
