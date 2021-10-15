@@ -24,7 +24,8 @@ export const OrderBook = ({
     const {current: item} = lineRef;
     if (maxRows.current === 0 && item && containerRef.current) {
       const rowHeight = item.offsetHeight;
-      const containerHeight = containerRef.current.offsetHeight;
+      const containerHeight =
+        containerRef.current.offsetHeight / (isMobile ? 2 : 1);
       maxRows.current = Math.floor(containerHeight / rowHeight);
     }
 
@@ -43,14 +44,14 @@ export const OrderBook = ({
   return (
     <div
       ref={containerRef}
-      className="w-full flex-grow overflow-hidden border-gray-800 border-b-2"
+      className="w-full flex-grow overflow-hidden border-gray-800 border-b-2 h-1/2"
       data-testid="book-container"
     >
       <div
         data-testid="order-book"
-        className="flex flex-col lg:flex-row text-white"
+        className="flex flex-col lg:flex-row text-white h-full"
       >
-        <div className="flex-grow">
+        <div className="flex-grow h-1/2 lg:h-auto">
           <BookList
             book={visibleBids}
             type="bid"
@@ -64,7 +65,7 @@ export const OrderBook = ({
             <Spread data={spread} />
           </div>
         )}
-        <div className="flex-grow">
+        <div className="flex-grow h-1/2 lg:h-autp">
           <BookList
             book={visibleAsks}
             type="ask"
