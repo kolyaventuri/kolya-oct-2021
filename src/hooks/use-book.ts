@@ -29,7 +29,12 @@ const calculateSpread = (bid: Book, ask: Book): Spread => {
   };
 };
 
-type UseBookResult = [Book, Book, Spread];
+interface Actions {
+  subscribe: () => void;
+  unsubscribe: () => void;
+  reset: () => void;
+}
+type UseBookResult = [Book, Book, Spread, Actions];
 
 export const useBook = (
   ticker: string,
@@ -39,6 +44,25 @@ export const useBook = (
   const [bids, setBids, bidRef] = useStatefulRef<Book>([]);
   const [asks, setAsks, askRef] = useStatefulRef<Book>([]);
   const [spread, setSpread] = React.useState<Spread>(initialSpread);
+  const actions: Actions = {
+    subscribe() {
+      socket?.send('subscribe', {
+        feed: FEED_ID,
+        product_ids: [`PI_${ticker}`],
+      });
+    },
+    unsubscribe() {
+      socket?.send('unsubscribe', {
+        feed: FEED_ID,
+        product_ids: [`PI_${previousTicker}`],
+      });
+    },
+    reset() {
+      setBids([]);
+      setAsks([]);
+      setSpread(initialSpread);
+    },
+  };
 
   React.useEffect(() => {
     if (!socket) {
@@ -46,25 +70,15 @@ export const useBook = (
     }
 
     if (ticker !== previousTicker) {
-      socket.send('unsubscribe', {
-        feed: FEED_ID,
-        product_ids: [`PI_${previousTicker}`],
-      });
-      socket.send('subscribe', {
-        feed: FEED_ID,
-        product_ids: [`PI_${ticker}`],
-      });
+      actions.unsubscribe();
+      actions.subscribe();
+
       setPreviousTicker(ticker);
-      setBids([]);
-      setAsks([]);
-      setSpread(initialSpread);
+      actions.reset();
     }
 
     socket.on('open', () => {
-      socket.send('subscribe', {
-        feed: FEED_ID,
-        product_ids: [`PI_${ticker}`],
-      });
+      actions.subscribe();
     });
 
     socket.on('message', (event) => {
@@ -87,5 +101,5 @@ export const useBook = (
     });
   }, [ticker, socket]);
 
-  return [bids, asks, spread];
+  return [bids, asks, spread, actions];
 };
