@@ -4,7 +4,7 @@ import {Book} from '../types/book';
 
 type BookType = 'bid' | 'ask';
 
-const textClass = 'inline flex-grow text-right px-10';
+const textClass = 'inline flex-grow text-right px-10 w-1/3';
 
 const order = {
   bid: ['total', 'size', 'price'],
@@ -20,11 +20,11 @@ const BookHeader = ({
   const names = order[type === 'ask' || isMobile ? 'ask' : 'bid'];
 
   return (
-    <li className="flex">
+    <li className="flex border-b-2 border-gray-800 py-1">
       {names.map((name) => (
         <span
           key={`label-${name}-${type}`}
-          className={cx('uppercase', textClass)}
+          className={cx('uppercase font-semibold text-gray-500', textClass)}
         >
           {name}
         </span>
