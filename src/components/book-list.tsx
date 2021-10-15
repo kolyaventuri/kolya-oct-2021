@@ -102,6 +102,10 @@ export const BookList = ({
   const formatter = React.useRef(new Intl.NumberFormat());
   const side = type === 'ask' || isMobile ? 'left' : 'right';
 
+  if (isMobile && type === 'ask') {
+    book.reverse();
+  }
+
   return (
     <ul data-testid={`${type}-list`}>
       {!isMobile && <BookHeader type={type} isMobile={isMobile} />}
