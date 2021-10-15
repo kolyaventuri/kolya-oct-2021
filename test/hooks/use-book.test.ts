@@ -345,3 +345,45 @@ test('#useBook clears bids and asks if unsubscribing', (t) => {
   t.deepEqual(result.current[1], []);
   t.deepEqual(result.current[2], {value: '0.0', percentage: '0.00%'});
 });
+
+test('#useBook returns an actions object, that can unsubscribe to the feed', (t) => {
+  const {socket, actions: actionStubs} = getStubs();
+  const {result} = renderHook(() => useBook('ticker', socket));
+
+  const actions = result.current[3];
+  t.is(typeof actions, 'object');
+
+  const {unsubscribe} = actions;
+
+  act(() => {
+    unsubscribe();
+  });
+
+  t.true(
+    actionStubs.send.calledWith('unsubscribe', {
+      feed: FEED_ID,
+      product_ids: [`PI_ticker`],
+    }),
+  );
+});
+
+test('#useBook returns an actions object, that can subscribe to the feed', (t) => {
+  const {socket, actions: actionStubs} = getStubs();
+  const {result} = renderHook(() => useBook('ticker', socket));
+
+  const actions = result.current[3];
+  t.is(typeof actions, 'object');
+
+  const {subscribe} = actions;
+
+  act(() => {
+    subscribe();
+  });
+
+  t.true(
+    actionStubs.send.calledWith('subscribe', {
+      feed: FEED_ID,
+      product_ids: [`PI_ticker`],
+    }),
+  );
+});
