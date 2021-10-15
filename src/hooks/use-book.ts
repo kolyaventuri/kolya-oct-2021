@@ -6,7 +6,16 @@ import {updateBook} from '../util/book';
 import {DataMessage, WrappedSocket} from '../util/socket';
 import {useStatefulRef} from './use-stateful-ref';
 
+const initialSpread: Spread = {
+  value: '0.0',
+  percentage: '0.00%',
+};
+
 const calculateSpread = (bid: Book, ask: Book): Spread => {
+  if (bid.length === 0 || ask.length === 0) {
+    return initialSpread;
+  }
+
   const topBid = bid[0][0];
   const topAsk = ask[0][0];
 
@@ -18,11 +27,6 @@ const calculateSpread = (bid: Book, ask: Book): Spread => {
     value: value.toPrecision(precision),
     percentage: percentage.toFixed(2) + '%',
   };
-};
-
-const initialSpread: Spread = {
-  value: '0.0',
-  percentage: '0.00%',
 };
 
 type UseBookResult = [Book, Book, Spread];
