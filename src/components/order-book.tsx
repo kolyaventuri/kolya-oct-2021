@@ -27,6 +27,10 @@ export const OrderBook = ({
       const containerHeight = containerRef.current.offsetHeight;
       maxRows.current = Math.floor(containerHeight / rowHeight);
     }
+
+    window.addEventListener('resize', () => {
+      maxRows.current = 0;
+    });
   }, [lineRef.current, maxRows.current, containerRef.current]);
 
   // TODO: Clean this calculation up

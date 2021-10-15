@@ -1,6 +1,12 @@
 import React from 'react';
 import test, {ExecutionContext} from 'ava';
-import {cleanup, render, screen, within} from '@testing-library/react';
+import {
+  cleanup,
+  render,
+  screen,
+  within,
+  fireEvent,
+} from '@testing-library/react';
 
 import {OrderBook} from '../../src/components/order-book';
 import {Book} from '../../src/types/book';
@@ -19,19 +25,24 @@ const spread = {
 };
 const formatter = new Intl.NumberFormat();
 
-test.before((t) => {
+const setHeightMultiplier = (n = 3): void => {
   Object.defineProperty(HTMLElement.prototype, 'offsetHeight', {
     configurable: true,
     get() {
       const value = 30;
       if (this.getAttribute('data-testid') === 'book-container') {
-        return value * 3;
+        return value * n;
       }
 
       return value;
     },
   });
-  (t.context as Record<string, any>).component = render(
+};
+
+test.before((t) => {
+  const context = t.context as Record<string, any>;
+  setHeightMultiplier();
+  context.component = render(
     <OrderBook bids={bids} asks={asks} spread={spread} isMobile={false} />,
   );
 });
@@ -155,4 +166,39 @@ test('renders a finite number of items based on the screen size', (t) => {
   const items = getAllByTestId('entry');
 
   t.is(items.length, 3); // Max length is 3 based on screen size of height 90
+});
+
+test('re-calculates the number that can be rendered on resize', (t) => {
+  // Rerender the component to update refs
+  const fn = () => {
+    rerender(t, {
+      bids: [
+        [1, 1],
+        [2, 2],
+        [3, 3],
+        [4, 4],
+        [5, 5],
+      ],
+      asks: [
+        [1, 1],
+        [2, 2],
+        [3, 3],
+        [4, 4],
+        [5, 5],
+      ],
+    });
+  };
+
+  fn();
+  setHeightMultiplier(2.5);
+  fireEvent(window, new Event('resize'));
+  // Continously re-render to step through ref updates
+  fn();
+  fn();
+
+  const list = screen.getByTestId('bid-list');
+  const {getAllByTestId} = within(list);
+  const items = getAllByTestId('entry');
+
+  t.is(items.length, 2); // Max length is 2 based on screen size of height 75
 });
