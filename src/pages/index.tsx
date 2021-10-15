@@ -35,7 +35,7 @@ const Home = (): JSX.Element => {
     window.addEventListener('resize', () => {
       checkMobile();
     });
-  }, []);
+  });
 
   const onToggle = () => {
     let feed = 'XBTUSD';
