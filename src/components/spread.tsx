@@ -7,6 +7,6 @@ interface Props {
 
 export const Spread = ({data}: Props): JSX.Element => (
   <div className="inline">
-    <p className="text-gray-600 inline">{`Spread: ${data.value} (${data.percentage})`}</p>
+    <p className="text-gray-400 font-semibold inline">{`Spread: ${data.value} (${data.percentage})`}</p>
   </div>
 );
