@@ -32,6 +32,7 @@ const calculateSpread = (bid: Book, ask: Book): Spread => {
 interface Actions {
   subscribe: () => void;
   unsubscribe: () => void;
+  reset: () => void;
 }
 type UseBookResult = [Book, Book, Spread, Actions];
 
@@ -56,6 +57,11 @@ export const useBook = (
         product_ids: [`PI_${previousTicker}`],
       });
     },
+    reset() {
+      setBids([]);
+      setAsks([]);
+      setSpread(initialSpread);
+    },
   };
 
   React.useEffect(() => {
@@ -68,9 +74,7 @@ export const useBook = (
       actions.subscribe();
 
       setPreviousTicker(ticker);
-      setBids([]);
-      setAsks([]);
-      setSpread(initialSpread);
+      actions.reset();
     }
 
     socket.on('open', () => {

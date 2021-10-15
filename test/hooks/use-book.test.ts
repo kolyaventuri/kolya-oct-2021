@@ -387,3 +387,32 @@ test('#useBook returns an actions object, that can subscribe to the feed', (t) =
     }),
   );
 });
+
+test('#useBook returns an actions object, that can reset the data', (t) => {
+  const {socket, events} = getStubs();
+
+  const {result} = renderHook(() => useBook('ticker', socket));
+  const actions = result.current[3];
+
+  act(() => {
+    events.onmessage({
+      type: 'data',
+      payload: {
+        bids: [
+          [34_062.5, 1],
+          [34_052.5, 2],
+        ],
+        asks: [
+          [34_167.5, 1],
+          [34_194, 2],
+        ],
+      },
+    });
+
+    actions.reset();
+  });
+
+  t.deepEqual(result.current[0], []);
+  t.deepEqual(result.current[1], []);
+  t.deepEqual(result.current[2], {value: '0.0', percentage: '0.00%'});
+});
