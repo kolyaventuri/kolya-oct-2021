@@ -1,28 +1,22 @@
 import React from 'react';
 import test from 'ava';
-import {shallow} from 'enzyme';
+import {cleanup, render, screen} from '@testing-library/react';
 
 import Home from '../../src/pages';
 
-const getComponent = () => shallow(<Home />);
-
-test('renders a head component', (t) => {
-  const tree = getComponent();
-
-  t.is(tree.find('Head').length, 1);
-});
+test.afterEach(cleanup);
 
 test('renders an order book', (t) => {
-  const tree = getComponent();
+  render(<Home />);
 
-  t.is(tree.find('OrderBook').length, 1);
+  t.not(screen.getByTestId('order-book'), undefined);
 });
 
 test('renders a header with the right ticker', (t) => {
-  const tree = getComponent();
-  const header = tree.find('Header');
+  render(<Home />);
 
-  t.is(header.length, 1);
-  const props = header.props();
-  t.is(props.ticker, 'XBTUSD');
+  const header = screen.getByTestId('header');
+
+  t.not(header, undefined);
+  t.true(header.textContent?.includes('XBTUSD'));
 });

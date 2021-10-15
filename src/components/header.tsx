@@ -8,7 +8,7 @@ interface HeaderProps {
 
 export const Header = ({ticker, status}: HeaderProps): JSX.Element => {
   return (
-    <div>
+    <div data-testid="header">
       <p>{ticker}</p>
       <p>{status}</p>
     </div>

@@ -8,7 +8,7 @@ interface Props {
 }
 
 export const OrderBook = ({bids, asks, spread}: Props): JSX.Element => (
-  <div>
+  <div data-testid="order-book">
     <div>
       <p>
         Spread: {spread.value} / {spread.percentage}
