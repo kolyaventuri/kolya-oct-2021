@@ -55,8 +55,6 @@ export class WrappedSocket {
   public on(event: 'close', callback: CallbackFn<CloseEvent>): void;
   public on(event: 'message', callback: CallbackFn<SocketMessage>): void;
   public on(event: EventType, callback: CallbackFn<any>): void {
-    const handler = `on${event}`;
-
     let fn = callback;
     if (event === 'message') {
       fn = (event: MessageEvent) => {
@@ -97,9 +95,7 @@ export class WrappedSocket {
     }
 
     this.__handlers[event]?.push(fn);
-    this.__socket[handler] = (payload: any) => {
-      this.__runHandler(event, payload);
-    };
+    this.__bindHandler(event);
 
     if (event === 'open' && this.isOpen) {
       // Emit the open handler immediately if the socket is already open
@@ -128,25 +124,21 @@ export class WrappedSocket {
 
     this.__socket = new window.WebSocket(this.__url);
 
-    // Reset all handlers, as they will be re-bound to the new socket
-    const handlers = Object.entries(this.__handlers).slice(); // Fast deep copy
     for (const name in this.__handlers) {
-      if (this.__handlers[name]) {
-        this.__handlers[name] = [];
-      }
-    }
-
-    for (const [event, callbackArray] of handlers) {
-      for (const callback of callbackArray) {
-        // @ts-expect-error - Event can only be one of EventType
-        // TODO: Resolve this type if possible
-        this.on(event, callback);
+      if (name in this.__handlers) {
+        this.__bindHandler(name);
       }
     }
   }
 
   public get isOpen(): boolean {
     return this.__socket.readyState === ReadyState.OPEN;
+  }
+
+  private __bindHandler(event: string): void {
+    this.__socket[`on${event}`] = (payload: any) => {
+      this.__runHandler(event, payload);
+    };
   }
 
   private __runHandler(handler: string, payload: any): void {

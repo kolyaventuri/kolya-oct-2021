@@ -1,5 +1,5 @@
 import test from 'ava';
-import {stub} from 'sinon';
+import {spy, stub} from 'sinon';
 import proxyquire from 'proxyquire';
 import {
   getSocket as realGetSocket,
@@ -158,6 +158,8 @@ test('WrappedSocket#open re-binds whichever events were listened', async (t) => 
   const {socket} = getSocket();
   const fn = stub();
   socket.on('open', fn);
+  // @ts-expect-error - Direct access
+  const bindSpy = spy(socket, '__bindHandler');
 
   const OldWS = window.WebSocket;
   const constructorStub = stub().callsFake(
@@ -197,6 +199,8 @@ test('WrappedSocket#open re-binds whichever events were listened', async (t) => 
   t.is(socket.__handlers.open[0], fn);
   // @ts-expect-error - Direct access
   t.is(socket.__handlers.open?.length, openEventCount);
+  // @ts-expect-error - Direct access
+  t.is(bindSpy.callCount, Object.keys(socket.__handlers).length);
 });
 
 test('WrappedSocket#open, if socket is already open, does not re-open it', (t) => {
