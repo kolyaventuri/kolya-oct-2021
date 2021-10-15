@@ -5,14 +5,23 @@ import {Header} from '../components/header';
 import {DisconnectOverlay} from '../components/disconnect-overlay';
 import {useSocket} from '../hooks/use-socket';
 import {useBook} from '../hooks/use-book';
+import {Footer} from '../components/footer';
 
 const Home = (): JSX.Element => {
   const [ticker, setTicker] = React.useState('XBTUSD');
   const [overlayVisible, setOverlayVisible] = React.useState(false);
+  const [isMobile, setIsMobile] = React.useState(false);
   const [status, socket] = useSocket();
   const [bid, ask, spread, actions] = useBook(ticker, socket);
 
+  const checkMobile = () => {
+    const mobile = window.matchMedia('screen and (max-width: 1000px)').matches;
+    setIsMobile(mobile);
+  };
+
   React.useEffect(() => {
+    checkMobile();
+
     document.addEventListener('visibilitychange', () => {
       if (!overlayVisible && document.hidden) {
         setOverlayVisible(true);
@@ -21,6 +30,10 @@ const Home = (): JSX.Element => {
           socket.close();
         }
       }
+    });
+
+    window.addEventListener('resize', () => {
+      checkMobile();
     });
   });
 
@@ -44,11 +57,17 @@ const Home = (): JSX.Element => {
       <Head>
         <title>Order Book</title>
       </Head>
-      <div>
-        <Header ticker={ticker} status={status} />
-        <OrderBook bids={bid} asks={ask} spread={spread} onToggle={onToggle} />
-        {overlayVisible && <DisconnectOverlay onReconnectClick={reconnect} />}
+      <div className="flex flex-col min-h-screen">
+        <Header
+          ticker={ticker}
+          status={status}
+          spread={spread}
+          isMobile={isMobile}
+        />
+        <OrderBook bids={bid} asks={ask} spread={spread} isMobile={isMobile} />
+        <Footer onToggle={onToggle} />
       </div>
+      {overlayVisible && <DisconnectOverlay onReconnectClick={reconnect} />}
     </>
   );
 };

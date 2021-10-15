@@ -1,50 +1,79 @@
 import * as React from 'react';
-import {Book, Spread} from '../types/book';
+import {Book, Spread as SpreadType} from '../types/book';
+import {BookList} from './book-list';
+import {Spread} from './spread';
 
 interface Props {
   bids: Book;
   asks: Book;
-  spread: Spread;
-  onToggle: () => void;
+  spread: SpreadType;
+  isMobile: boolean;
 }
-
-interface ListProps {
-  book: Book;
-  type: 'bid' | 'ask';
-}
-
-const BookList = ({book, type}: ListProps): JSX.Element => (
-  <ul data-testid={`${type}-list`}>
-    {book.map(([price, size, total]) => (
-      <li key={`${type}-${price}`}>
-        <span data-testid={`${type}-total`}>{total}</span>
-        <span data-testid={`${type}-size`}>{size}</span>
-        <span data-testid={`${type}-price`}>{price}</span>
-      </li>
-    ))}
-  </ul>
-);
 
 export const OrderBook = ({
   bids,
   asks,
   spread,
-  onToggle,
-}: Props): JSX.Element => (
-  <div data-testid="order-book">
-    <div>
-      <button type="button" onClick={onToggle}>
-        Toggle Feed
-      </button>
-      <p>
-        Spread: {spread.value} / {spread.percentage}
-      </p>
-      <h1>Bids</h1>
-      <BookList book={bids} type="bid" />
+  isMobile,
+}: Props): JSX.Element => {
+  const containerRef = React.useRef<HTMLDivElement>(null);
+  const lineRef = React.useRef<HTMLLIElement>(null);
+  const maxRows = React.useRef<number>(0);
+
+  React.useEffect(() => {
+    const {current: item} = lineRef;
+    if (maxRows.current === 0 && item && containerRef.current) {
+      const rowHeight = item.offsetHeight;
+      const containerHeight =
+        containerRef.current.offsetHeight / (isMobile ? 2 : 1);
+      maxRows.current = Math.floor(containerHeight / rowHeight);
+    }
+
+    window.addEventListener('resize', () => {
+      maxRows.current = 0;
+    });
+  }, [lineRef.current, maxRows.current, containerRef.current]);
+
+  // TODO: Clean this calculation up
+  const visibleBids = bids.slice(0, maxRows.current || 1);
+  const visibleAsks = asks.slice(0, maxRows.current || 1);
+  const maxSize = Math.max(
+    ...[...visibleAsks, ...visibleBids].map((items) => items[2]),
+  );
+
+  return (
+    <div
+      ref={containerRef}
+      className="w-full flex-grow overflow-hidden border-gray-800 border-b-2 h-1/2"
+      data-testid="book-container"
+    >
+      <div
+        data-testid="order-book"
+        className="flex flex-col lg:flex-row text-white h-full"
+      >
+        <div className="flex-grow h-1/2 lg:h-auto">
+          <BookList
+            book={visibleBids}
+            type="bid"
+            isMobile={isMobile}
+            maxSize={maxSize}
+            lineRef={lineRef} // Only required on one size since the components are identical
+          />
+        </div>
+        {isMobile && (
+          <div className="flex-grow">
+            <Spread data={spread} />
+          </div>
+        )}
+        <div className="flex-grow h-1/2 lg:h-autp">
+          <BookList
+            book={visibleAsks}
+            type="ask"
+            isMobile={isMobile}
+            maxSize={maxSize}
+          />
+        </div>
+      </div>
     </div>
-    <div>
-      <h1>Asks</h1>
-      <BookList book={asks} type="ask" />
-    </div>
-  </div>
-);
+  );
+};
