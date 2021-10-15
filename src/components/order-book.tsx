@@ -35,10 +35,12 @@ export const OrderBook = ({
   const maxSize = Math.max(
     ...[...visibleAsks, ...visibleBids].map((items) => items[2]),
   );
+
   return (
     <div
       ref={containerRef}
       className="w-full flex-grow overflow-hidden border-gray-800 border-b-2"
+      data-testid="book-container"
     >
       <div
         data-testid="order-book"
