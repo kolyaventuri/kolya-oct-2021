@@ -31,12 +31,12 @@ test.before(() => {
 });
 test.after(cleanup);
 
-test('renders an list of bids', (t) => {
+test('renders a list of bids', (t) => {
   const list = screen.getByTestId('bid-list');
   t.not(list, undefined);
 
-  const {getAllByRole} = within(list);
-  const items = getAllByRole('listitem');
+  const {getAllByTestId} = within(list);
+  const items = getAllByTestId('entry');
 
   t.is(items.length, bids.length);
   for (const [i, bid] of bids.entries()) {
@@ -49,12 +49,12 @@ test('renders an list of bids', (t) => {
   }
 });
 
-test('renders an list of asks', (t) => {
+test('renders a list of asks', (t) => {
   const list = screen.getByTestId('ask-list');
   t.not(list, undefined);
 
-  const {getAllByRole} = within(list);
-  const items = getAllByRole('listitem');
+  const {getAllByTestId} = within(list);
+  const items = getAllByTestId('entry');
 
   t.is(items.length, asks.length);
   for (const [i, ask] of asks.entries()) {

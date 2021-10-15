@@ -91,7 +91,7 @@ export const BookList = ({book, type, isMobile}: ListProps): JSX.Element => (
   <ul data-testid={`${type}-list`}>
     {!isMobile && <BookHeader type={type} isMobile={isMobile} />}
     {book.map(([price, size, total]) => (
-      <li key={`${type}-${price}`} className="flex">
+      <li key={`${type}-${price}`} className="flex" data-testid="entry">
         {getCells({type, isMobile, price, size, total})}
       </li>
     ))}
