@@ -1,10 +1,14 @@
 import * as React from 'react';
 import cx from 'classnames';
 import {ConnectionStatus} from '../types/socket';
+import {Spread as SpreadType} from '../types/book';
+import {Spread} from './spread';
 
 interface HeaderProps {
   ticker: string;
   status: ConnectionStatus;
+  isMobile: boolean;
+  spread: SpreadType;
 }
 
 const statusColors = {
@@ -13,7 +17,12 @@ const statusColors = {
   [ConnectionStatus.CONNECTED]: 'bg-green-400',
 };
 
-export const Header = ({ticker, status}: HeaderProps): JSX.Element => {
+export const Header = ({
+  ticker,
+  status,
+  isMobile,
+  spread,
+}: HeaderProps): JSX.Element => {
   return (
     <div
       data-testid="header"
@@ -21,6 +30,7 @@ export const Header = ({ticker, status}: HeaderProps): JSX.Element => {
     >
       <h1 className="font-semibold inline px-2">Order Book</h1>
       <p className="inline px-2">{ticker}</p>
+      {!isMobile && <Spread data={spread} />}
       <div className="inline float-right">
         <div
           className={cx(

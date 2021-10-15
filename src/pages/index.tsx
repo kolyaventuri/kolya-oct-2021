@@ -45,7 +45,12 @@ const Home = (): JSX.Element => {
         <title>Order Book</title>
       </Head>
       <div>
-        <Header ticker={ticker} status={status} />
+        <Header
+          ticker={ticker}
+          status={status}
+          spread={spread}
+          isMobile={false}
+        />
         <OrderBook bids={bid} asks={ask} spread={spread} onToggle={onToggle} />
         {overlayVisible && <DisconnectOverlay onReconnectClick={reconnect} />}
       </div>
