@@ -66,3 +66,16 @@ test('renders a list of asks', (t) => {
     t.true(getByTestId('ask-price').textContent?.includes(`${price}`));
   }
 });
+
+test('each entry has a background, proportional to its total against the max total', (t) => {
+  const list = screen.getByTestId('bid-list');
+  const {getAllByTestId} = within(list);
+  const items = getAllByTestId('entry');
+
+  const bid = items[0];
+  const {getByTestId} = within(bid);
+
+  const background = getByTestId('entry-bg');
+  // Max is 12, first item is 3 in the bids = 25%
+  t.is(background.style.width, '25%');
+});

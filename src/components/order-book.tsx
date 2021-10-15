@@ -17,26 +17,39 @@ export const OrderBook = ({
   spread,
   onToggle,
   isMobile,
-}: Props): JSX.Element => (
-  <div className="w-full">
-    <div
-      data-testid="order-book"
-      className="flex flex-col lg:flex-row text-white"
-    >
-      <div className="flex-grow">
-        <BookList book={bids} type="bid" isMobile={isMobile} />
-      </div>
-      {isMobile && (
+}: Props): JSX.Element => {
+  const maxSize = Math.max(...[...bids, ...asks].map((items) => items[2]));
+  return (
+    <div className="w-full">
+      <div
+        data-testid="order-book"
+        className="flex flex-col lg:flex-row text-white"
+      >
         <div className="flex-grow">
-          <Spread data={spread} />
+          <BookList
+            book={bids}
+            type="bid"
+            isMobile={isMobile}
+            maxSize={maxSize}
+          />
         </div>
-      )}
-      <div className="flex-grow">
-        <BookList book={asks} type="ask" isMobile={isMobile} />
+        {isMobile && (
+          <div className="flex-grow">
+            <Spread data={spread} />
+          </div>
+        )}
+        <div className="flex-grow">
+          <BookList
+            book={asks}
+            type="ask"
+            isMobile={isMobile}
+            maxSize={maxSize}
+          />
+        </div>
       </div>
+      <button type="button" onClick={onToggle}>
+        Toggle Feed
+      </button>
     </div>
-    <button type="button" onClick={onToggle}>
-      Toggle Feed
-    </button>
-  </div>
-);
+  );
+};

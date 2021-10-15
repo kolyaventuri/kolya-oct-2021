@@ -3,11 +3,6 @@ import cx from 'classnames';
 import {Book} from '../types/book';
 
 type BookType = 'bid' | 'ask';
-interface ListProps {
-  book: Book;
-  type: BookType;
-  isMobile: boolean;
-}
 
 const textClass = 'inline flex-grow text-right px-10';
 
@@ -38,9 +33,9 @@ const BookHeader = ({
   );
 };
 
-const textColor = {
-  bid: 'text-green-400',
-  ask: 'text-red-500',
+const color = {
+  bid: 'green-400',
+  ask: 'red-500',
 };
 
 interface RowProps {
@@ -75,7 +70,7 @@ const getCells = ({
     <span
       key={`${type}-price-${price}`}
       data-testid={`${type}-price`}
-      className={cx(textClass, textColor[type])}
+      className={cx(textClass, `text-${color[type]}`)}
     >
       {price}
     </span>,
@@ -87,13 +82,43 @@ const getCells = ({
   return cells;
 };
 
-export const BookList = ({book, type, isMobile}: ListProps): JSX.Element => (
-  <ul data-testid={`${type}-list`}>
-    {!isMobile && <BookHeader type={type} isMobile={isMobile} />}
-    {book.map(([price, size, total]) => (
-      <li key={`${type}-${price}`} className="flex" data-testid="entry">
-        {getCells({type, isMobile, price, size, total})}
-      </li>
-    ))}
-  </ul>
-);
+interface ListProps {
+  book: Book;
+  maxSize: number;
+  type: BookType;
+  isMobile: boolean;
+}
+
+export const BookList = ({
+  book,
+  type,
+  isMobile,
+  maxSize,
+}: ListProps): JSX.Element => {
+  const side = type === 'ask' || isMobile ? 'left' : 'right';
+
+  return (
+    <ul data-testid={`${type}-list`}>
+      {!isMobile && <BookHeader type={type} isMobile={isMobile} />}
+      {book.map(([price, size, total]) => {
+        const width = `${(total / maxSize) * 100}%`;
+        return (
+          <li
+            key={`${type}-${price}`}
+            className="flex relative"
+            data-testid="entry"
+          >
+            <div
+              className={cx(
+                `absolute ${side}-0 h-full opacity-25 bg-${color[type]}`,
+              )}
+              style={{width}}
+              data-testid="entry-bg"
+            />
+            {getCells({type, isMobile, price, size, total})}
+          </li>
+        );
+      })}
+    </ul>
+  );
+};
