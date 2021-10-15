@@ -14,6 +14,23 @@ import {WebSocket, WebSocketServer} from 'ws';
 import xbtInit from '../fixtures/pi_xbtusd.init.json';
 import xbtRunning from '../fixtures/pi_xbtusd.json';
 
+const ethInit = xbtInit.map(item => {
+  if (item.bids) {
+    item.bids = item.bids.map(([price, size]) => [price * 2, size / 2]);
+    item.asks = item.asks.map(([price, size]) => [price * 2, size / 2]);
+  }
+
+  return item; 
+});
+const ethRunning = xbtRunning.map(item => {
+  if (item.bids) {
+    item.bids = item.bids.map(([price, size]) => [price * 2, size / 2]);
+    item.asks = item.asks.map(([price, size]) => [price * 2, size / 2]);
+  }
+
+  return item; 
+});
+
 const dataSets: Record<
   string,
   {
@@ -25,6 +42,10 @@ const dataSets: Record<
     init: xbtInit,
     running: xbtRunning,
   },
+  PI_ETHUSD: {
+    init: ethInit,
+    running: ethRunning,
+  }
 };
 
 const wss = new WebSocketServer({port: 8080});
