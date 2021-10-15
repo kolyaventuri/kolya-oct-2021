@@ -8,10 +8,17 @@ interface Props {
   onToggle: () => void;
 }
 
-export const OrderBook = ({bids, asks, spread, onToggle}: Props): JSX.Element => (
+export const OrderBook = ({
+  bids,
+  asks,
+  spread,
+  onToggle,
+}: Props): JSX.Element => (
   <div data-testid="order-book">
     <div>
-      <button type="button" onClick={onToggle}>Toggle Feed</button>
+      <button type="button" onClick={onToggle}>
+        Toggle Feed
+      </button>
       <p>
         Spread: {spread.value} / {spread.percentage}
       </p>

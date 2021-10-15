@@ -17,7 +17,7 @@ const Home = (): JSX.Element => {
     }
 
     setTicker(feed);
-  }
+  };
 
   return (
     <>
@@ -26,7 +26,7 @@ const Home = (): JSX.Element => {
       </Head>
       <div>
         <Header ticker={ticker} status={status} />
-        <OrderBook bids={bid} asks={ask} spread={spread} onToggle={onToggle}/>
+        <OrderBook bids={bid} asks={ask} spread={spread} onToggle={onToggle} />
       </div>
     </>
   );
