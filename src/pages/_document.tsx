@@ -20,7 +20,7 @@ class Document extends NextDoc {
     return (
       <Html lang="en" className="h-screen">
         <Head />
-        <body className="h-screen">
+        <body className="h-screen bg-slate">
           <Main />
           <NextScript />
           <style jsx global>{`
