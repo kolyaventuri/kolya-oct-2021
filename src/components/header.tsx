@@ -26,7 +26,7 @@ export const Header = ({
   return (
     <div
       data-testid="header"
-      className="text-white w-full border-b-2 border-gray-700 py-1 px-2"
+      className="text-white w-full border-b-2 border-gray-700 py-1 px-2 flex-grow"
     >
       <h1 className="font-semibold inline px-2">Order Book</h1>
       <p className="inline px-2">{ticker}</p>

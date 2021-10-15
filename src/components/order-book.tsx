@@ -7,7 +7,6 @@ interface Props {
   bids: Book;
   asks: Book;
   spread: SpreadType;
-  onToggle: () => void;
   isMobile: boolean;
 }
 
@@ -15,12 +14,11 @@ export const OrderBook = ({
   bids,
   asks,
   spread,
-  onToggle,
   isMobile,
 }: Props): JSX.Element => {
   const maxSize = Math.max(...[...bids, ...asks].map((items) => items[2]));
   return (
-    <div className="w-full">
+    <div className="w-full flex-grow overflow-hidden">
       <div
         data-testid="order-book"
         className="flex flex-col lg:flex-row text-white"
@@ -47,9 +45,6 @@ export const OrderBook = ({
           />
         </div>
       </div>
-      <button type="button" onClick={onToggle}>
-        Toggle Feed
-      </button>
     </div>
   );
 };

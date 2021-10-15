@@ -5,6 +5,7 @@ import {Header} from '../components/header';
 import {DisconnectOverlay} from '../components/disconnect-overlay';
 import {useSocket} from '../hooks/use-socket';
 import {useBook} from '../hooks/use-book';
+import {Footer} from '../components/footer';
 
 const Home = (): JSX.Element => {
   const [ticker, setTicker] = React.useState('XBTUSD');
@@ -45,22 +46,17 @@ const Home = (): JSX.Element => {
       <Head>
         <title>Order Book</title>
       </Head>
-      <div>
+      <div className="flex flex-col min-h-screen">
         <Header
           ticker={ticker}
           status={status}
           spread={spread}
           isMobile={isMobile}
         />
-        <OrderBook
-          bids={bid}
-          asks={ask}
-          spread={spread}
-          isMobile={isMobile}
-          onToggle={onToggle}
-        />
-        {overlayVisible && <DisconnectOverlay onReconnectClick={reconnect} />}
+        <OrderBook bids={bid} asks={ask} spread={spread} isMobile={isMobile} />
+        <Footer onToggle={onToggle} />
       </div>
+      {overlayVisible && <DisconnectOverlay onReconnectClick={reconnect} />}
     </>
   );
 };
