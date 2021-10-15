@@ -5,7 +5,7 @@ interface Props {
 }
 
 export const Footer = ({onToggle}: Props): JSX.Element => (
-  <div className="w-full border-t-2 border-gray-800 py-4 bg-slate text-center">
+  <div className="w-full py-4 bg-slate text-center flex-wrap">
     <button
       type="button"
       className="bg-indigo-600 text-white px-4 py-1 rounded-md font-semibold"

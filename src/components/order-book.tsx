@@ -16,20 +16,41 @@ export const OrderBook = ({
   spread,
   isMobile,
 }: Props): JSX.Element => {
+  const containerRef = React.useRef<HTMLDivElement>(null);
+  const lineRef = React.useRef<HTMLLIElement>(null);
+  const maxRows = React.useRef<number>(0);
+
+  React.useEffect(() => {
+    const {current: item} = lineRef;
+    if (maxRows.current === 0 && item && containerRef.current) {
+      const rowHeight = item.offsetHeight;
+      const containerHeight = containerRef.current.offsetHeight;
+      maxRows.current = Math.floor(containerHeight / rowHeight);
+    }
+  }, [lineRef.current, maxRows.current, containerRef.current]);
+
   // TODO: Clean this calculation up
-  const maxSize = Math.max(...[...bids, ...asks].map((items) => items[2]));
+  const visibleBids = bids.slice(0, maxRows.current || 1);
+  const visibleAsks = asks.slice(0, maxRows.current || 1);
+  const maxSize = Math.max(
+    ...[...visibleAsks, ...visibleBids].map((items) => items[2]),
+  );
   return (
-    <div className="w-full flex-grow overflow-hidden">
+    <div
+      ref={containerRef}
+      className="w-full flex-grow overflow-hidden border-gray-800 border-b-2"
+    >
       <div
         data-testid="order-book"
         className="flex flex-col lg:flex-row text-white"
       >
         <div className="flex-grow">
           <BookList
-            book={bids}
+            book={visibleBids}
             type="bid"
             isMobile={isMobile}
             maxSize={maxSize}
+            lineRef={lineRef} // Only required on one size since the components are identical
           />
         </div>
         {isMobile && (
@@ -39,7 +60,7 @@ export const OrderBook = ({
         )}
         <div className="flex-grow">
           <BookList
-            book={asks}
+            book={visibleAsks}
             type="ask"
             isMobile={isMobile}
             maxSize={maxSize}

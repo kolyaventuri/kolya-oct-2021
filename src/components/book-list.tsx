@@ -89,6 +89,7 @@ interface ListProps {
   maxSize: number;
   type: BookType;
   isMobile: boolean;
+  lineRef?: React.RefObject<HTMLLIElement>;
 }
 
 export const BookList = ({
@@ -96,6 +97,7 @@ export const BookList = ({
   type,
   isMobile,
   maxSize,
+  lineRef,
 }: ListProps): JSX.Element => {
   const formatter = React.useRef(new Intl.NumberFormat());
   const side = type === 'ask' || isMobile ? 'left' : 'right';
@@ -103,10 +105,11 @@ export const BookList = ({
   return (
     <ul data-testid={`${type}-list`}>
       {!isMobile && <BookHeader type={type} isMobile={isMobile} />}
-      {book.map(([price, size, total]) => {
+      {book.map(([price, size, total], i) => {
         const width = `${(total / maxSize) * 100}%`;
         return (
           <li
+            ref={i === 0 ? lineRef : undefined}
             key={`${type}-${price}`}
             className="flex relative"
             data-testid="entry"
