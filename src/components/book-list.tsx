@@ -44,6 +44,7 @@ interface RowProps {
   price: number;
   size: number;
   total: number;
+  formatter: Intl.NumberFormat;
 }
 const getCells = ({
   type,
@@ -51,6 +52,7 @@ const getCells = ({
   price,
   size,
   total,
+  formatter,
 }: RowProps): JSX.Element[] => {
   const cells = [
     <span
@@ -58,21 +60,21 @@ const getCells = ({
       data-testid={`${type}-total`}
       className={textClass}
     >
-      {total}
+      {formatter?.format(total)}
     </span>,
     <span
       key={`${type}-size-${price}`}
       data-testid={`${type}-size`}
       className={textClass}
     >
-      {size}
+      {formatter?.format(size)}
     </span>,
     <span
       key={`${type}-price-${price}`}
       data-testid={`${type}-price`}
       className={cx(textClass, `text-${color[type]}`)}
     >
-      {price}
+      {formatter?.format(price)}
     </span>,
   ];
   if (type === 'ask' || isMobile) {
@@ -95,6 +97,7 @@ export const BookList = ({
   isMobile,
   maxSize,
 }: ListProps): JSX.Element => {
+  const formatter = React.useRef(new Intl.NumberFormat());
   const side = type === 'ask' || isMobile ? 'left' : 'right';
 
   return (
@@ -115,7 +118,14 @@ export const BookList = ({
               style={{width}}
               data-testid="entry-bg"
             />
-            {getCells({type, isMobile, price, size, total})}
+            {getCells({
+              type,
+              isMobile,
+              price,
+              size,
+              total,
+              formatter: formatter.current,
+            })}
           </li>
         );
       })}
