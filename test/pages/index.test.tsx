@@ -1,28 +1,48 @@
 import React from 'react';
 import test from 'ava';
-import {shallow} from 'enzyme';
+import {cleanup, render, screen} from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import proxyquire from 'proxyquire';
+import {stub} from 'sinon';
 
-import Home from '../../src/pages';
+import {ConnectionStatus} from '../../src/types/socket';
 
-const getComponent = () => shallow(<Home />);
+const socket = {
+  on() {},
+  send() {},
+  close() {},
+  open() {},
+};
+const useSocket = stub().returns([ConnectionStatus.CONNECTED, socket]);
 
-test('renders a head component', (t) => {
-  const tree = getComponent();
+const Home = proxyquire.noCallThru()('../../src/pages', {
+  '../hooks/use-socket': {useSocket},
+}).default;
 
-  t.is(tree.find('Head').length, 1);
+test.before(() => {
+  render(<Home />);
 });
+test.after(cleanup);
 
 test('renders an order book', (t) => {
-  const tree = getComponent();
-
-  t.is(tree.find('OrderBook').length, 1);
+  t.not(screen.getByTestId('order-book'), undefined);
 });
 
 test('renders a header with the right ticker', (t) => {
-  const tree = getComponent();
-  const header = tree.find('Header');
+  const header = screen.getByTestId('header');
 
-  t.is(header.length, 1);
-  const props = header.props();
-  t.is(props.ticker, 'XBTUSD');
+  t.not(header, undefined);
+  t.true(header?.textContent?.includes('XBTUSD'));
+});
+
+test('renders a toggle button in the order book, that when clicked, toggles the ticker', (t) => {
+  const button = screen.getByText('Toggle Feed');
+
+  t.true(screen.getByTestId('header')?.textContent?.includes('XBTUSD'));
+
+  t.not(button, undefined);
+  userEvent.click(button);
+  t.true(screen.getByTestId('header')?.textContent?.includes('ETHUSD'));
+  userEvent.click(button);
+  t.true(screen.getByTestId('header')?.textContent?.includes('XBTUSD'));
 });

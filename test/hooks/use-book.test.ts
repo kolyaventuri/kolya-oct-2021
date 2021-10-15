@@ -282,3 +282,66 @@ test('#useBook calculates large spreads', (t) => {
     percentage: '0.31%',
   });
 });
+
+test('#useBook unsubscribes from the old ticker, and to the new one, if the ticker changes', (t) => {
+  const {actions, socket, events} = getStubs();
+  socket.on('open', () => {
+    (socket as Mutable<WrappedSocket>).isOpen = true;
+  });
+
+  const {rerender} = renderHook(({ticker}) => useBook(ticker, socket), {
+    initialProps: {
+      ticker: 'ticker',
+    },
+  });
+
+  act(() => {
+    events.onopen();
+    rerender({ticker: 'newTicker'});
+  });
+
+  t.true(
+    actions.send.calledWith('unsubscribe', {
+      feed: FEED_ID,
+      product_ids: ['PI_ticker'],
+    }),
+  );
+
+  t.true(
+    actions.send.calledWith('subscribe', {
+      feed: FEED_ID,
+      product_ids: ['PI_newTicker'],
+    }),
+  );
+});
+
+test('#useBook clears bids and asks if unsubscribing', (t) => {
+  const {socket, events} = getStubs();
+
+  const {rerender, result} = renderHook(({ticker}) => useBook(ticker, socket), {
+    initialProps: {
+      ticker: 'ticker',
+    },
+  });
+
+  act(() => {
+    events.onmessage({
+      type: 'data',
+      payload: {
+        bids: [
+          [34_062.5, 1],
+          [34_052.5, 2],
+        ],
+        asks: [
+          [34_167.5, 1],
+          [34_194, 2],
+        ],
+      },
+    });
+    rerender({ticker: 'newTicker'});
+  });
+
+  t.deepEqual(result.current[0], []);
+  t.deepEqual(result.current[1], []);
+  t.deepEqual(result.current[2], {value: '0.0', percentage: '0.00%'});
+});

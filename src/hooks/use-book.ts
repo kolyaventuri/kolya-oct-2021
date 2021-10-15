@@ -6,7 +6,16 @@ import {updateBook} from '../util/book';
 import {DataMessage, WrappedSocket} from '../util/socket';
 import {useStatefulRef} from './use-stateful-ref';
 
+const initialSpread: Spread = {
+  value: '0.0',
+  percentage: '0.00%',
+};
+
 const calculateSpread = (bid: Book, ask: Book): Spread => {
+  if (bid.length === 0 || ask.length === 0) {
+    return initialSpread;
+  }
+
   const topBid = bid[0][0];
   const topAsk = ask[0][0];
 
@@ -26,16 +35,29 @@ export const useBook = (
   ticker: string,
   socket: WrappedSocket | undefined,
 ): UseBookResult => {
+  const [previousTicker, setPreviousTicker] = React.useState(ticker);
   const [bids, setBids, bidRef] = useStatefulRef<Book>([]);
   const [asks, setAsks, askRef] = useStatefulRef<Book>([]);
-  const [spread, setSpread] = React.useState<Spread>({
-    value: '0.0',
-    percentage: '0.0',
-  });
+  const [spread, setSpread] = React.useState<Spread>(initialSpread);
 
   React.useEffect(() => {
     if (!socket) {
       return;
+    }
+
+    if (ticker !== previousTicker) {
+      socket.send('unsubscribe', {
+        feed: FEED_ID,
+        product_ids: [`PI_${previousTicker}`],
+      });
+      socket.send('subscribe', {
+        feed: FEED_ID,
+        product_ids: [`PI_${ticker}`],
+      });
+      setPreviousTicker(ticker);
+      setBids([]);
+      setAsks([]);
+      setSpread(initialSpread);
     }
 
     socket.on('open', () => {
