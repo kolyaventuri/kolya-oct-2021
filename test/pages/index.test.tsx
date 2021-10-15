@@ -2,8 +2,22 @@ import React from 'react';
 import test from 'ava';
 import {cleanup, render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import proxyquire from 'proxyquire';
+import {stub} from 'sinon';
 
-import Home from '../../src/pages';
+import {ConnectionStatus} from '../../src/types/socket';
+
+const socket = {
+  on() {},
+  send() {},
+  close() {},
+  open() {},
+};
+const useSocket = stub().returns([ConnectionStatus.CONNECTED, socket]);
+
+const Home = proxyquire.noCallThru()('../../src/pages', {
+  '../hooks/use-socket': {useSocket},
+}).default;
 
 test.before(() => {
   render(<Home />);
