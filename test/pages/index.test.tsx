@@ -10,8 +10,8 @@ import {ConnectionStatus} from '../../src/types/socket';
 const socket = {
   on() {},
   send() {},
-  close() {},
-  open() {},
+  open: stub(),
+  close: stub(),
 };
 const useSocket = stub().returns([ConnectionStatus.CONNECTED, socket]);
 
@@ -23,6 +23,10 @@ test.before(() => {
   render(<Home />);
 });
 test.after(cleanup);
+test.beforeEach(() => {
+  socket.close.reset();
+  socket.open.reset();
+});
 
 test('renders an order book', (t) => {
   t.not(screen.getByTestId('order-book'), undefined);
@@ -74,4 +78,28 @@ test('disconnected overlay stays visible even if the document re-gains focus', (
   fireEvent(document, new Event('visibilitychange'));
 
   t.not(screen.queryByTestId('dc-overlay'), null);
+});
+
+test('closes the socket connection if document loses focus', (t) => {
+  Object.defineProperty(document, 'hidden', {
+    configurable: true,
+    get: () => true,
+  });
+  fireEvent(document, new Event('visibilitychange'));
+
+  t.true(socket.close.called);
+});
+
+test('renders a Reconnect button on the disconnect overlay that fires socket.open', (t) => {
+  Object.defineProperty(document, 'hidden', {
+    configurable: true,
+    get: () => true,
+  });
+  fireEvent(document, new Event('visibilitychange'));
+
+  userEvent.click(screen.getByText('Reconnect'));
+
+  t.true(socket.open.called);
+
+  t.is(screen.queryByText('Reconnect'), null);
 });

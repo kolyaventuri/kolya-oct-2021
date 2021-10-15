@@ -16,9 +16,10 @@ const Home = (): JSX.Element => {
     document.addEventListener('visibilitychange', () => {
       if (!overlayVisible && document.hidden) {
         setOverlayVisible(true);
+        socket?.close();
       }
     });
-  }, []);
+  });
 
   const onToggle = () => {
     let feed = 'XBTUSD';
@@ -29,6 +30,11 @@ const Home = (): JSX.Element => {
     setTicker(feed);
   };
 
+  const reconnect = () => {
+    socket?.open();
+    setOverlayVisible(false);
+  };
+
   return (
     <>
       <Head>
@@ -37,7 +43,7 @@ const Home = (): JSX.Element => {
       <div>
         <Header ticker={ticker} status={status} />
         <OrderBook bids={bid} asks={ask} spread={spread} onToggle={onToggle} />
-        {overlayVisible && <DisconnectOverlay />}
+        {overlayVisible && <DisconnectOverlay onReconnectClick={reconnect} />}
       </div>
     </>
   );
