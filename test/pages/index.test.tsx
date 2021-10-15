@@ -1,6 +1,6 @@
 import React from 'react';
 import test from 'ava';
-import {cleanup, render, screen} from '@testing-library/react';
+import {cleanup, render, screen, fireEvent} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import proxyquire from 'proxyquire';
 import {stub} from 'sinon';
@@ -45,4 +45,33 @@ test('renders a toggle button in the order book, that when clicked, toggles the 
   t.true(screen.getByTestId('header')?.textContent?.includes('ETHUSD'));
   userEvent.click(button);
   t.true(screen.getByTestId('header')?.textContent?.includes('XBTUSD'));
+});
+
+test('renders disconnected overlay if the document loses focus', (t) => {
+  t.is(screen.queryByTestId('dc-overlay'), null);
+
+  // Overwrite read-only property
+  Object.defineProperty(document, 'hidden', {
+    configurable: true,
+    get: () => true,
+  });
+  fireEvent(document, new Event('visibilitychange'));
+
+  t.not(screen.queryByTestId('dc-overlay'), null);
+});
+
+test('disconnected overlay stays visible even if the document re-gains focus', (t) => {
+  // Overwrite read-only property
+  Object.defineProperty(document, 'hidden', {
+    configurable: true,
+    get: () => true,
+  });
+  fireEvent(document, new Event('visibilitychange'));
+  Object.defineProperty(document, 'hidden', {
+    configurable: true,
+    get: () => false,
+  });
+  fireEvent(document, new Event('visibilitychange'));
+
+  t.not(screen.queryByTestId('dc-overlay'), null);
 });
