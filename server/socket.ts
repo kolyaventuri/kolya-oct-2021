@@ -14,7 +14,8 @@ import {WebSocket, WebSocketServer} from 'ws';
 import xbtInit from '../fixtures/pi_xbtusd.init.json';
 import xbtRunning from '../fixtures/pi_xbtusd.json';
 
-const ethInit = xbtInit.map(item => {
+// JSON string + parse is a really quick and dirty way of doing a deep copy
+const ethInit = JSON.parse(JSON.stringify(xbtInit)).map(item => {
   if (item.bids) {
     item.bids = item.bids.map(([price, size]) => [price * 2, size / 2]);
     item.asks = item.asks.map(([price, size]) => [price * 2, size / 2]);
@@ -22,7 +23,7 @@ const ethInit = xbtInit.map(item => {
 
   return item; 
 });
-const ethRunning = xbtRunning.map(item => {
+const ethRunning = JSON.parse(JSON.stringify(xbtRunning)).map(item => {
   if (item.bids) {
     item.bids = item.bids.map(([price, size]) => [price * 2, size / 2]);
     item.asks = item.asks.map(([price, size]) => [price * 2, size / 2]);
