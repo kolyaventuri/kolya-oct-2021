@@ -20,7 +20,13 @@ const spread = {
 
 test.before(() => {
   render(
-    <OrderBook bids={bids} asks={asks} spread={spread} onToggle={() => {}} />,
+    <OrderBook
+      bids={bids}
+      asks={asks}
+      spread={spread}
+      isMobile={false}
+      onToggle={() => {}}
+    />,
   );
 });
 test.after(cleanup);

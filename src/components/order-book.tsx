@@ -1,50 +1,42 @@
 import * as React from 'react';
-import {Book, Spread} from '../types/book';
+import {Book, Spread as SpreadType} from '../types/book';
+import {BookList} from './book-list';
+import {Spread} from './spread';
 
 interface Props {
   bids: Book;
   asks: Book;
-  spread: Spread;
+  spread: SpreadType;
   onToggle: () => void;
+  isMobile: boolean;
 }
-
-interface ListProps {
-  book: Book;
-  type: 'bid' | 'ask';
-}
-
-const BookList = ({book, type}: ListProps): JSX.Element => (
-  <ul data-testid={`${type}-list`}>
-    {book.map(([price, size, total]) => (
-      <li key={`${type}-${price}`}>
-        <span data-testid={`${type}-total`}>{total}</span>
-        <span data-testid={`${type}-size`}>{size}</span>
-        <span data-testid={`${type}-price`}>{price}</span>
-      </li>
-    ))}
-  </ul>
-);
 
 export const OrderBook = ({
   bids,
   asks,
   spread,
   onToggle,
+  isMobile,
 }: Props): JSX.Element => (
-  <div data-testid="order-book">
-    <div>
-      <button type="button" onClick={onToggle}>
-        Toggle Feed
-      </button>
-      <p>
-        Spread: {spread.value} / {spread.percentage}
-      </p>
-      <h1>Bids</h1>
-      <BookList book={bids} type="bid" />
+  <div className="w-full">
+    <div
+      data-testid="order-book"
+      className="flex flex-col lg:flex-row text-white"
+    >
+      <div className="flex-grow">
+        <BookList book={bids} type="bid" isMobile={isMobile} />
+      </div>
+      {isMobile && (
+        <div className="flex-grow">
+          <Spread data={spread} />
+        </div>
+      )}
+      <div className="flex-grow">
+        <BookList book={asks} type="ask" isMobile={isMobile} />
+      </div>
     </div>
-    <div>
-      <h1>Asks</h1>
-      <BookList book={asks} type="ask" />
-    </div>
+    <button type="button" onClick={onToggle}>
+      Toggle Feed
+    </button>
   </div>
 );

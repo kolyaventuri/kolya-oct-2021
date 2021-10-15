@@ -9,6 +9,7 @@ import {useBook} from '../hooks/use-book';
 const Home = (): JSX.Element => {
   const [ticker, setTicker] = React.useState('XBTUSD');
   const [overlayVisible, setOverlayVisible] = React.useState(false);
+  const [isMobile] = React.useState(false);
   const [status, socket] = useSocket();
   const [bid, ask, spread, actions] = useBook(ticker, socket);
 
@@ -49,9 +50,15 @@ const Home = (): JSX.Element => {
           ticker={ticker}
           status={status}
           spread={spread}
-          isMobile={false}
+          isMobile={isMobile}
         />
-        <OrderBook bids={bid} asks={ask} spread={spread} onToggle={onToggle} />
+        <OrderBook
+          bids={bid}
+          asks={ask}
+          spread={spread}
+          isMobile={isMobile}
+          onToggle={onToggle}
+        />
         {overlayVisible && <DisconnectOverlay onReconnectClick={reconnect} />}
       </div>
     </>
