@@ -20,22 +20,40 @@ const calculateSpread = (bid: Book, ask: Book): Spread => {
   };
 };
 
+const initialSpread: Spread = {
+  value: '0.0',
+  percentage: '0.00%',
+};
+
 type UseBookResult = [Book, Book, Spread];
 
 export const useBook = (
   ticker: string,
   socket: WrappedSocket | undefined,
 ): UseBookResult => {
+  const [previousTicker, setPreviousTicker] = React.useState(ticker);
   const [bids, setBids, bidRef] = useStatefulRef<Book>([]);
   const [asks, setAsks, askRef] = useStatefulRef<Book>([]);
-  const [spread, setSpread] = React.useState<Spread>({
-    value: '0.0',
-    percentage: '0.0',
-  });
+  const [spread, setSpread] = React.useState<Spread>(initialSpread);
 
   React.useEffect(() => {
     if (!socket) {
       return;
+    }
+
+    if (ticker !== previousTicker) {
+      socket.send('unsubscribe', {
+        feed: FEED_ID,
+        product_ids: [`PI_${previousTicker}`],
+      });
+      socket.send('subscribe', {
+        feed: FEED_ID,
+        product_ids: [`PI_${ticker}`],
+      });
+      setPreviousTicker(ticker);
+      setBids([]);
+      setAsks([]);
+      setSpread(initialSpread);
     }
 
     socket.on('open', () => {
