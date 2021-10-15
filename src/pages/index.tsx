@@ -10,12 +10,13 @@ const Home = (): JSX.Element => {
   const [ticker, setTicker] = React.useState('XBTUSD');
   const [overlayVisible, setOverlayVisible] = React.useState(false);
   const [status, socket] = useSocket();
-  const [bid, ask, spread] = useBook(ticker, socket);
+  const [bid, ask, spread, actions] = useBook(ticker, socket);
 
   React.useEffect(() => {
     document.addEventListener('visibilitychange', () => {
       if (!overlayVisible && document.hidden) {
         setOverlayVisible(true);
+        actions.unsubscribe();
         socket?.close();
       }
     });
@@ -31,6 +32,7 @@ const Home = (): JSX.Element => {
   };
 
   const reconnect = () => {
+    actions.reset();
     socket?.open();
     setOverlayVisible(false);
   };

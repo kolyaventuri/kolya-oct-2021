@@ -13,10 +13,16 @@ const socket = {
   open: stub(),
   close: stub(),
 };
+const actions = {
+  reset: stub(),
+  unsubscribe: stub(),
+};
 const useSocket = stub().returns([ConnectionStatus.CONNECTED, socket]);
+const useBook = stub().returns([[], [], {}, actions]);
 
 const Home = proxyquire.noCallThru()('../../src/pages', {
   '../hooks/use-socket': {useSocket},
+  '../hooks/use-book': {useBook},
 }).default;
 
 test.before(() => {
@@ -26,6 +32,7 @@ test.after(cleanup);
 test.beforeEach(() => {
   socket.close.reset();
   socket.open.reset();
+  actions.unsubscribe.reset();
 });
 
 test('renders an order book', (t) => {
@@ -80,17 +87,18 @@ test('disconnected overlay stays visible even if the document re-gains focus', (
   t.not(screen.queryByTestId('dc-overlay'), null);
 });
 
-test('closes the socket connection if document loses focus', (t) => {
+test('unsubscribes from the feed and closes the socket connection if document loses focus', (t) => {
   Object.defineProperty(document, 'hidden', {
     configurable: true,
     get: () => true,
   });
   fireEvent(document, new Event('visibilitychange'));
 
+  t.true(actions.unsubscribe.called);
   t.true(socket.close.called);
 });
 
-test('renders a Reconnect button on the disconnect overlay that fires socket.open', (t) => {
+test('renders a Reconnect button on the disconnect overlay that fires the reset action, and socket.open', (t) => {
   Object.defineProperty(document, 'hidden', {
     configurable: true,
     get: () => true,
@@ -99,6 +107,7 @@ test('renders a Reconnect button on the disconnect overlay that fires socket.ope
 
   userEvent.click(screen.getByText('Reconnect'));
 
+  t.true(actions.reset.called);
   t.true(socket.open.called);
 
   t.is(screen.queryByText('Reconnect'), null);
