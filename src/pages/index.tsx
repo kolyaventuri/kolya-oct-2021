@@ -16,8 +16,10 @@ const Home = (): JSX.Element => {
     document.addEventListener('visibilitychange', () => {
       if (!overlayVisible && document.hidden) {
         setOverlayVisible(true);
-        actions.unsubscribe();
-        socket?.close();
+        if (socket?.isOpen) {
+          actions.unsubscribe();
+          socket.close();
+        }
       }
     });
   });

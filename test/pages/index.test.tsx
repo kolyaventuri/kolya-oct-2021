@@ -12,6 +12,7 @@ const socket = {
   send() {},
   open: stub(),
   close: stub(),
+  isOpen: false,
 };
 const actions = {
   reset: stub(),
@@ -92,6 +93,7 @@ test('unsubscribes from the feed and closes the socket connection if document lo
     configurable: true,
     get: () => true,
   });
+  socket.isOpen = true;
   fireEvent(document, new Event('visibilitychange'));
 
   t.true(actions.unsubscribe.called);

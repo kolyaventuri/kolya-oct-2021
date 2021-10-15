@@ -169,12 +169,34 @@ test('WrappedSocket#open re-binds whichever events were listened', async (t) => 
     return constructorStub(...args);
   };
 
+  // @ts-expect-error - Direct access
+  const openEventCount = socket.__handlers.open?.length ?? 0;
+
+  // https://stackoverflow.com/a/44782052/3685123 - Instance deep clone
+  const oldSocket = Object.assign(
+    // @ts-expect-error - Direct access
+    Object.create(Object.getPrototypeOf(socket.__socket)),
+    // @ts-expect-error - Direct access
+    socket.__socket,
+  );
+
   socket.close();
   await delay();
+  // @ts-expect-error - Direct access, force into readyState 3 (CLOSED) since we're using mocked sockets
+  Object.defineProperty(socket.__socket, 'readyState', {
+    configurable: true,
+    get: () => 3, // ReadyState.CLOSED
+  });
+
   socket.open();
 
   // @ts-expect-error - Direct access
+  t.not(socket.__socket, oldSocket);
+
+  // @ts-expect-error - Direct access
   t.is(socket.__handlers.open[0], fn);
+  // @ts-expect-error - Direct access
+  t.is(socket.__handlers.open?.length, openEventCount);
 });
 
 test('WrappedSocket#open, if socket is already open, does not re-open it', (t) => {

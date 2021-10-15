@@ -127,7 +127,16 @@ export class WrappedSocket {
     }
 
     this.__socket = new window.WebSocket(this.__url);
-    for (const [event, callbackArray] of Object.entries(this.__handlers)) {
+
+    // Reset all handlers, as they will be re-bound to the new socket
+    const handlers = Object.entries(this.__handlers).slice(); // Fast deep copy
+    for (const name in this.__handlers) {
+      if (this.__handlers[name]) {
+        this.__handlers[name] = [];
+      }
+    }
+
+    for (const [event, callbackArray] of handlers) {
       for (const callback of callbackArray) {
         // @ts-expect-error - Event can only be one of EventType
         // TODO: Resolve this type if possible
