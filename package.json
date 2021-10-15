@@ -12,7 +12,7 @@
     "lint:tsc": "tsc --noEmit",
     "lint:lint": "xo --fix",
     "dev": "cross-env ENV=dev next -p 4000",
-    "local": "cross-env ENV=local concurrently --kill-others \"next -p 4000\" \"npm run local-socket\"",
+    "local": "cross-env NEXT_PUBLIC_ENV=local ENV=local concurrently --kill-others \"next -p 4000\" \"npm run local-socket\"",
     "local-socket": "ts-node -T -O \"{\\\"module\\\":\\\"commonjs\\\"}\" ./server/socket.ts",
     "build:files": "next build",
     "build:export": "next export",
