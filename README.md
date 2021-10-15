@@ -17,6 +17,7 @@ Renders an order book for XBTUSD or ETHUSD, using the CryptoFacilities WebSocket
 - Testing
   - [AVA](https://github.com/avajs/ava) (test runner)
   - [XO](https://github.com/xojs/xo) (code linting) 
+  - [React Testing Library](https://testing-library.com/docs/react-testing-library/intro/)
 
 # Setup + Running
 - Clone the repo and `npm i` to install dependencies
