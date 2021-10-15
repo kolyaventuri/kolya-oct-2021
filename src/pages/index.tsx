@@ -10,11 +10,18 @@ import {Footer} from '../components/footer';
 const Home = (): JSX.Element => {
   const [ticker, setTicker] = React.useState('XBTUSD');
   const [overlayVisible, setOverlayVisible] = React.useState(false);
-  const [isMobile] = React.useState(false);
+  const [isMobile, setIsMobile] = React.useState(false);
   const [status, socket] = useSocket();
   const [bid, ask, spread, actions] = useBook(ticker, socket);
 
+  const checkMobile = () => {
+    const mobile = window.matchMedia('screen and (max-width: 768px)').matches;
+    setIsMobile(mobile);
+  };
+
   React.useEffect(() => {
+    checkMobile();
+
     document.addEventListener('visibilitychange', () => {
       if (!overlayVisible && document.hidden) {
         setOverlayVisible(true);
@@ -24,7 +31,11 @@ const Home = (): JSX.Element => {
         }
       }
     });
-  });
+
+    window.addEventListener('resize', () => {
+      checkMobile();
+    });
+  }, []);
 
   const onToggle = () => {
     let feed = 'XBTUSD';

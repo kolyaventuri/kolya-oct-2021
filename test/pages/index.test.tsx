@@ -1,9 +1,15 @@
 import React from 'react';
 import test from 'ava';
-import {cleanup, render, screen, fireEvent} from '@testing-library/react';
+import {
+  cleanup,
+  render,
+  screen,
+  fireEvent,
+  within,
+} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import proxyquire from 'proxyquire';
-import {stub} from 'sinon';
+import {SinonStub, stub} from 'sinon';
 
 import {ConnectionStatus} from '../../src/types/socket';
 
@@ -113,4 +119,25 @@ test('renders a Reconnect button on the disconnect overlay that fires the reset 
   t.true(socket.open.called);
 
   t.is(screen.queryByText('Reconnect'), null);
+});
+
+test('renders the spread in the header', (t) => {
+  const header = screen.getByTestId('header');
+  const {getByTestId} = within(header);
+
+  t.not(getByTestId('spread-display'), null);
+});
+
+test("if mobile, doesn't render the spread in the header", (t) => {
+  (window.matchMedia as SinonStub).returns({
+    matches: true,
+  });
+  fireEvent(window, new Event('resize'));
+
+  const header = screen.getByTestId('header');
+  const {queryByTestId} = within(header);
+
+  t.is(queryByTestId('spread-display'), null);
+
+  (window.matchMedia as SinonStub).reset();
 });
