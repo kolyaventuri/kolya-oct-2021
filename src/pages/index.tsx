@@ -15,7 +15,7 @@ const Home = (): JSX.Element => {
   const [bid, ask, spread, actions] = useBook(ticker, socket);
 
   const checkMobile = () => {
-    const mobile = window.matchMedia('screen and (max-width: 768px)').matches;
+    const mobile = window.matchMedia('screen and (max-width: 1000px)').matches;
     setIsMobile(mobile);
   };
 
